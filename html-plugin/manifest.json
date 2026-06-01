@@ -2,12 +2,12 @@
   "name": "HTML Plugin",
   "version": "1.0",
   "description": "Generic HTML renderer for custom interactive content",
-  "actionTypes": [],
+  "actionTypes": ["GET_SESSION_CONFIGURATION"],
   "configurationExamples": [
     {
       "name": "Default",
       "configuration": {
-        "html": "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
+        "html": "<h2>Test heading</h2><p>This is a paragraph to confirm the plugin is working.</p>"
       }
     }
   ]
