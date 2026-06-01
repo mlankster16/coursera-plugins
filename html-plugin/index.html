@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Plugin</title>
+  <script src="https://www.coursera.org/widget/coursera-widget-connect-v0.js"></script>
+</head>
+<body>
+  <div id="content">
+    <p style="color: #999; font-size: 14px;">Loading...</p>
+  </div>
+
+  <script>
+    function render(config) {
+      document.getElementById('content').innerHTML = config.html;
+    }
+
+    window.onload = function() {
+      if (window.CourseraWidget) {
+        CourseraWidget.on('configuration', function(config) {
+          render(config);
+        });
+      } else {
+        render({
+          html: "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
+        });
+      }
+    };
+  </script>
+</body>
+</html>
