@@ -18,30 +18,35 @@
     }
 
     function render(config) {
-      log('render called with: ' + JSON.stringify(config));
+      log('render called');
       document.getElementById('content').innerHTML = config.html;
     }
 
-    log('Script started');
-    log('CourseraWidget exists: ' + (typeof window.CourseraWidget !== 'undefined'));
-
-    window.onload = function() {
-      log('window.onload fired');
-      log('CourseraWidget now: ' + (typeof window.CourseraWidget !== 'undefined'));
+    function waitForWidget(attempts) {
+      attempts = attempts || 0;
+      log('Checking for widget, attempt: ' + attempts);
 
       if (window.CourseraWidget) {
-        log('Registering configuration listener');
+        log('Widget found!');
         CourseraWidget.on('configuration', function(config) {
-          log('Configuration received!');
+          log('Configuration received: ' + JSON.stringify(config));
           render(config);
         });
+      } else if (attempts < 20) {
+        setTimeout(function() {
+          waitForWidget(attempts + 1);
+        }, 250);
       } else {
-        log('CourseraWidget not found - using fallback');
+        log('Widget never loaded - using fallback');
         render({
           html: "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
         });
       }
-    };
+    }
+
+    log('Script started');
+    waitForWidget();
   </script>
 </body>
+</html>
 </html>
