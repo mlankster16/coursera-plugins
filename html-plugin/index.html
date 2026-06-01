@@ -4,49 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HTML Plugin</title>
-  <script src="https://www.coursera.org/widget/coursera-widget-connect-v0.js"></script>
+  <link rel="stylesheet" href="https://www.coursera.org/api/utilities/v1/css/coursera-widget-connect-v0.css">
+  <script src="https://www.coursera.org/api/utilities/v1/js/coursera-widget-connect-v0.js"></script>
 </head>
 <body>
   <div id="content">
     <p style="color: #999; font-size: 14px;">Loading...</p>
   </div>
-  <div id="debug" style="margin-top: 20px; padding: 12px; background: #f5f5f5; font-size: 12px; font-family: monospace;"></div>
 
   <script>
-    function log(msg) {
-      document.getElementById('debug').innerHTML += '<div>' + msg + '</div>';
-    }
-
-    function render(config) {
-      log('render called');
-      document.getElementById('content').innerHTML = config.html;
-    }
-
-    function waitForWidget(attempts) {
-      attempts = attempts || 0;
-      log('Checking for widget, attempt: ' + attempts);
-
-      if (window.CourseraWidget) {
-        log('Widget found!');
-        CourseraWidget.on('configuration', function(config) {
-          log('Configuration received: ' + JSON.stringify(config));
-          render(config);
-        });
-      } else if (attempts < 20) {
-        setTimeout(function() {
-          waitForWidget(attempts + 1);
-        }, 250);
-      } else {
-        log('Widget never loaded - using fallback');
-        render({
-          html: "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
-        });
+    courseraApi.callMethod({
+      type: 'GET_SESSION_CONFIGURATION',
+      data: {},
+      onSuccess: function(config) {
+        if (config && config.html) {
+          document.getElementById('content').innerHTML = config.html;
+        } else {
+          document.getElementById('content').innerHTML = '<p>No content configured yet.</p>';
+        }
+      },
+      onError: function(err) {
+        document.getElementById('content').innerHTML = '<p>Error loading content.</p>';
       }
-    }
-
-    log('Script started');
-    waitForWidget();
+    });
   </script>
 </body>
-</html>
 </html>
