@@ -10,18 +10,33 @@
   <div id="content">
     <p style="color: #999; font-size: 14px;">Loading...</p>
   </div>
+  <div id="debug" style="margin-top: 20px; padding: 12px; background: #f5f5f5; font-size: 12px; font-family: monospace;"></div>
 
   <script>
+    function log(msg) {
+      document.getElementById('debug').innerHTML += '<div>' + msg + '</div>';
+    }
+
     function render(config) {
+      log('render called with: ' + JSON.stringify(config));
       document.getElementById('content').innerHTML = config.html;
     }
 
+    log('Script started');
+    log('CourseraWidget exists: ' + (typeof window.CourseraWidget !== 'undefined'));
+
     window.onload = function() {
+      log('window.onload fired');
+      log('CourseraWidget now: ' + (typeof window.CourseraWidget !== 'undefined'));
+
       if (window.CourseraWidget) {
+        log('Registering configuration listener');
         CourseraWidget.on('configuration', function(config) {
+          log('Configuration received!');
           render(config);
         });
       } else {
+        log('CourseraWidget not found - using fallback');
         render({
           html: "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
         });
