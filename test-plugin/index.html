@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test Plugin</title>
+  <title>Accordion Plugin</title>
+  <script src="https://www.coursera.org/widget/coursera-widget-connect-v0.js"></script>
   <style>
     body {
       font-family: sans-serif;
@@ -32,9 +33,7 @@
       justify-content: space-between;
       align-items: center;
     }
-    .accordion-header:hover {
-      background: #ebebeb;
-    }
+    .accordion-header:hover { background: #ebebeb; }
     .accordion-body {
       padding: 0 16px;
       max-height: 0;
@@ -45,47 +44,13 @@
       max-height: 200px;
       padding: 14px 16px;
     }
-    .arrow {
-      transition: transform 0.3s ease;
-    }
-    .arrow.open {
-      transform: rotate(180deg);
-    }
+    .arrow { transition: transform 0.3s ease; }
+    .arrow.open { transform: rotate(180deg); }
   </style>
-  <script src="https://www.coursera.org/widget/coursera-widget-connect-v0.js"></script>
 </head>
 <body>
-
-  <h2>Key Terms: Artificial Intelligence</h2>
-
-  <div class="accordion-item">
-    <div class="accordion-header" onclick="toggle(this)">
-      Machine Learning
-      <span class="arrow">▼</span>
-    </div>
-    <div class="accordion-body">
-      A type of AI where systems learn from data to improve their performance over time — without being explicitly programmed for each task.
-    </div>
-  </div>
-
-  <div class="accordion-item">
-    <div class="accordion-header" onclick="toggle(this)">
-      Large Language Model (LLM)
-      <span class="arrow">▼</span>
-    </div>
-    <div class="accordion-body">
-      An AI system trained on large amounts of text data that can generate, summarize, translate, and reason about language.
-    </div>
-  </div>
-
-  <div class="accordion-item">
-    <div class="accordion-header" onclick="toggle(this)">
-      Hallucination
-      <span class="arrow">▼</span>
-    </div>
-    <div class="accordion-body">
-      When an AI model generates information that sounds confident and plausible but is factually incorrect or made up.
-    </div>
+  <div id="accordion-container">
+    <p style="color: #999; font-size: 14px;">Loading...</p>
   </div>
 
   <script>
@@ -95,7 +60,47 @@
       body.classList.toggle('open');
       arrow.classList.toggle('open');
     }
-  </script>
 
+    function render(config) {
+      const container = document.getElementById('accordion-container');
+      
+      let html = '';
+      if (config.title) {
+        html += '<h2>' + config.title + '</h2>';
+      }
+
+      if (config.items && config.items.length > 0) {
+        config.items.forEach(function(item) {
+          html += '<div class="accordion-item">';
+          html += '<div class="accordion-header" onclick="toggle(this)">';
+          html += item.header;
+          html += '<span class="arrow">▼</span>';
+          html += '</div>';
+          html += '<div class="accordion-body">' + item.body + '</div>';
+          html += '</div>';
+        });
+      }
+
+      container.innerHTML = html;
+    }
+
+    window.onload = function() {
+      if (window.CourseraWidget) {
+        CourseraWidget.on('configuration', function(config) {
+          render(config);
+        });
+      } else {
+        render({
+          title: "Key Terms: Artificial Intelligence",
+          items: [
+            {
+              header: "Machine Learning",
+              body: "A type of AI where systems learn from data to improve their performance over time."
+            }
+          ]
+        });
+      }
+    };
+  </script>
 </body>
 </html>
