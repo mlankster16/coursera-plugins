@@ -1,0 +1,14 @@
+{
+  "name": "HTML Plugin",
+  "version": "1.0",
+  "description": "Generic HTML renderer for custom interactive content",
+  "actionTypes": [],
+  "configurationExamples": [
+    {
+      "name": "Default",
+      "configuration": {
+        "html": "<h2>Hello from the HTML plugin</h2><p>Replace this with your generated HTML content.</p>"
+      }
+    }
+  ]
+}
