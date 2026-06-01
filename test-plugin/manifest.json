@@ -2,5 +2,11 @@
   "name": "Test Plugin",
   "version": "1.0",
   "description": "First test of a custom Coursera interactive plugin",
-  "actionTypes": []
+  "actionTypes": [],
+  "configurationExamples": [
+    {
+      "name": "Default",
+      "configuration": "{}"
+    }
+  ]
 }
