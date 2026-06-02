@@ -582,8 +582,12 @@
   </main>
 
   <script>
-    const USE_MOCK_API = false;
-    const CLAUDE_API_KEY = 'YOUR_API_KEY_HERE';
+    // ── API CONFIG ───────────────────────────────────────────────────────────
+    // Set USE_MOCK_API = true to use built-in sample data (no key needed).
+    // Set USE_MOCK_API = false to call the real Claude API via the Netlify
+    // function. The API key lives in Netlify's environment variables
+    // (CLAUDE_API_KEY) — it never needs to be in this file.
+    const USE_MOCK_API = true;
 
     const SYSTEM_PROMPT = `You are an expert learning experience designer specializing in online course design for Coursera. You help learning designers at Duke Learning Innovation transform static course content into engaging interactive components that can be embedded directly in Coursera courses.
 
@@ -798,25 +802,12 @@ Do not wrap your response in markdown code fences or backticks. Return only the 
         return MOCK_RESPONSES['Accordion'];
       }
 
-      let messageContent = userInput;
-      if (forcedType) {
-        messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
-      }
-
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
+      // Call the Netlify serverless function — the API key stays in
+      // Netlify's environment variables and never touches this file.
+      const response = await fetch('/.netlify/functions/analyze', {
         method: 'POST',
-        headers: {
-          'x-api-key': CLAUDE_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
-          max_tokens: 8192,
-          system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: messageContent }]
-        })
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ userInput, forcedType, systemPrompt: SYSTEM_PROMPT })
       });
 
       if (!response.ok) {
@@ -825,7 +816,7 @@ Do not wrap your response in markdown code fences or backticks. Return only the 
       }
 
       const data = await response.json();
-      const raw = data.content[0].text;
+      const raw = data.text;
       const cleaned = raw
         .replace(/^```json\n?/, '')
         .replace(/^```\n?/, '')
