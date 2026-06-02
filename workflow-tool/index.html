@@ -691,8 +691,11 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
     "html": "complete self-contained HTML and CSS string with Duke brand applied",
     "script": "complete JavaScript string using addEventListener only, no inline handlers"
   },
-  "static": "Full static companion text in plain prose. 2-4 paragraphs."
-}`;
+"static": "Full static companion text in plain prose. 2-4 paragraphs."
+}
+
+Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no ```json, no ``` — just the object itself starting with { and ending with }.
+`;
 
     const MOCK_RESPONSES = {
       "Accordion": {
