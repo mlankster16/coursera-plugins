@@ -582,8 +582,8 @@
   </main>
 
   <script>
-    const USE_MOCK_API = true;
-    const CLAUDE_API_KEY = 'YOUR_API_KEY_HERE';
+    const USE_MOCK_API = false;
+    const CLAUDE_API_KEY = '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';
 
     const SYSTEM_PROMPT = `You are an expert learning experience designer specializing in online course design for Coursera. You help learning designers at Duke Learning Innovation transform static course content into engaging interactive components that can be embedded directly in Coursera courses.
 
@@ -691,8 +691,11 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
     "html": "complete self-contained HTML and CSS string with Duke brand applied",
     "script": "complete JavaScript string using addEventListener only, no inline handlers"
   },
-  "static": "Full static companion text in plain prose. 2-4 paragraphs."
-}`;
+"static": "Full static companion text in plain prose. 2-4 paragraphs."
+}
+
+Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no ```json, no ``` — just the object itself starting with { and ending with }.
+`;
 
     const MOCK_RESPONSES = {
       "Accordion": {
