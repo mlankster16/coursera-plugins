@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LX Interaction Design Workflow Tool — Duke Learning Innovation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Open+Sans:ital,wght@0,400;0,600;1,400&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy: #012169;
+      --royal: #00539B;
+      --whisper: #F3F2F1;
+      --hatteras: #E2E6ED;
+      --cast-iron: #262626;
+      --graphite: #666666;
+      --persimmon: #E89923;
+      --white: #ffffff;
+      --code-bg: #1E1E1E;
+      --code-fg: #D4D4D4;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Open Sans', Arial, sans-serif;
+      background: var(--whisper);
+      color: var(--cast-iron);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--navy);
+      border-bottom: 0.5px solid #001550;
+    }
+
+    .header-inner {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .wordmark {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+
+    .wordmark-d {
+      width: 32px;
+      height: 32px;
+      background: var(--white);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .wordmark-d svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .wordmark-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .wordmark-duke {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 0.8rem;
+      color: var(--white);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .wordmark-li {
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-weight: 400;
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.75);
+      letter-spacing: 0.03em;
+    }
+
+    .step-indicator {
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.6);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      max-width: 800px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px 64px;
+    }
+
+    /* ── STEPS ── */
+    .step {
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .step.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── STEP 1 ── */
+    .step1-heading {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--navy);
+      margin-bottom: 10px;
+      line-height: 1.25;
+    }
+
+    .step1-sub {
+      font-size: 0.95rem;
+      color: var(--graphite);
+      line-height: 1.6;
+      margin-bottom: 32px;
+      max-width: 620px;
+    }
+
+    .form-label {
+      display: block;
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--navy);
+      margin-bottom: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .challenge-textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 16px;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 0.95rem;
+      color: var(--cast-iron);
+      background: var(--white);
+      border: 0.5px solid var(--hatteras);
+      border-radius: 8px;
+      resize: vertical;
+      line-height: 1.6;
+      transition: border-color 0.15s;
+      outline: none;
+    }
+
+    .challenge-textarea:focus {
+      border-color: var(--royal);
+      box-shadow: 0 0 0 3px rgba(0, 83, 155, 0.15);
+    }
+
+    .challenge-textarea::placeholder {
+      color: #aab;
+    }
+
+    .char-count {
+      font-size: 0.78rem;
+      color: var(--graphite);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .char-count.warn {
+      color: var(--persimmon);
+    }
+
+    .btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+      padding: 14px 28px;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s, box-shadow 0.15s;
+      text-decoration: none;
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--royal);
+    }
+
+    .btn-primary:focus-visible {
+      outline: 3px solid var(--persimmon);
+      outline-offset: 3px;
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    /* ── STEP 2 — LOADING ── */
+    .loading-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 320px;
+      text-align: center;
+      gap: 20px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      border: 3.5px solid var(--hatteras);
+      border-top-color: var(--royal);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-heading {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: var(--navy);
+    }
+
+    .loading-sub {
+      font-size: 0.88rem;
+      color: var(--graphite);
+      line-height: 1.5;
+      max-width: 380px;
+    }
+
+    /* ── STEP 3 — RESULTS ── */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: var(--royal);
+      text-decoration: none;
+      margin-bottom: 28px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      padding: 4px 0;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+    }
+
+    .back-link:hover {
+      border-bottom-color: var(--royal);
+    }
+
+    .back-link:focus-visible {
+      outline: 3px solid var(--persimmon);
+      outline-offset: 3px;
+      border-radius: 3px;
+    }
+
+    .results-heading {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 700;
+      font-size: 1.4rem;
+      color: var(--navy);
+      margin-bottom: 24px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 0.5px solid var(--hatteras);
+      border-radius: 12px;
+      padding: 24px 28px;
+      margin-bottom: 16px;
+    }
+
+    .card-title {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--graphite);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+
+    /* Card 1 */
+    .interaction-badge {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 5px 14px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+      letter-spacing: 0.03em;
+    }
+
+    .card-rationale {
+      font-size: 0.92rem;
+      color: var(--cast-iron);
+      line-height: 1.65;
+    }
+
+    /* Card 2 */
+    .theme-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+    }
+
+    .color-swatch {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 0.5px solid var(--hatteras);
+      flex-shrink: 0;
+    }
+
+    .theme-desc {
+      font-size: 0.92rem;
+      color: var(--cast-iron);
+      line-height: 1.65;
+      font-style: italic;
+    }
+
+    /* Card 3 */
+    .code-section {
+      margin-bottom: 18px;
+    }
+
+    .code-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .code-label {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--graphite);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .code-block pre {
+      font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
+      font-size: 0.8rem;
+      color: var(--code-fg);
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin: 0;
+    }
+
+    .btn-copy {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 8px 16px;
+      background: transparent;
+      color: var(--royal);
+      border: 0.5px solid var(--royal);
+      border-radius: 6px;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+      letter-spacing: 0.02em;
+    }
+
+    .btn-copy:hover {
+      background: var(--royal);
+      color: var(--white);
+    }
+
+    .btn-copy:focus-visible {
+      outline: 3px solid var(--persimmon);
+      outline-offset: 3px;
+    }
+
+    .btn-copy.copied {
+      background: #2d7a2d;
+      border-color: #2d7a2d;
+      color: var(--white);
+    }
+
+    /* Card 4 */
+    .static-text {
+      font-size: 0.92rem;
+      color: var(--cast-iron);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    /* ── ERROR ── */
+    .error-box {
+      background: #fff3f0;
+      border: 0.5px solid #e89923;
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 16px;
+      font-size: 0.88rem;
+      color: #7a3300;
+      display: none;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .step1-heading { font-size: 1.3rem; }
+      .btn-primary { width: 100%; }
+      .card { padding: 20px 18px; }
+      .header-inner { padding: 0 16px; }
+      main { padding: 28px 16px 48px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header" role="banner">
+    <div class="header-inner">
+      <a class="wordmark" href="#" aria-label="Duke Learning Innovation home">
+        <div class="wordmark-d" aria-hidden="true">
+          <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 3h6c3.866 0 7 3.134 7 7s-3.134 7-7 7H4V3z" fill="#012169"/>
+          </svg>
+        </div>
+        <div class="wordmark-text">
+          <span class="wordmark-duke">Duke</span>
+          <span class="wordmark-li">Learning Innovation</span>
+        </div>
+      </a>
+      <span class="step-indicator" id="step-label" aria-live="polite">Step 1 of 3</span>
+    </div>
+  </header>
+
+  <main id="main-content">
+
+    <!-- STEP 1 -->
+    <section class="step active" id="step-1" aria-labelledby="s1-heading">
+      <h1 class="step1-heading" id="s1-heading">LX Interaction Design<br>Workflow Tool</h1>
+      <p class="step1-sub">
+        Describe your learning design challenge and this tool will identify the best interaction type for your content, generate a ready-to-use Coursera plugin JSON configuration, and provide an accessible static companion text.
+      </p>
+
+      <label class="form-label" for="challenge-input">Describe your learning design challenge</label>
+      <textarea
+        id="challenge-input"
+        class="challenge-textarea"
+        placeholder="Example: I have a module on nursing assessment frameworks that lists five different tools — SBAR, HEAD-TO-TOE, OLDCARTS, ABCDE, and CIWA-Ar. Right now it's just five paragraphs of text. Learners need to know when and why to use each one, but the content feels dense and hard to scan. Most learners will already know at least one or two of these frameworks."
+        aria-describedby="char-count-hint"
+        maxlength="4000"
+      ></textarea>
+      <div class="char-count" id="char-count-hint" aria-live="polite">0 / 4000 — 50 characters minimum to analyze</div>
+      <div class="error-box" id="error-box" role="alert"></div>
+      <button class="btn-primary" id="analyze-btn" disabled aria-disabled="true">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Analyze Challenge
+      </button>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="step" id="step-2" aria-labelledby="s2-heading" aria-live="assertive">
+      <div class="loading-center">
+        <div class="spinner" role="status" aria-hidden="true"></div>
+        <h2 class="loading-heading" id="s2-heading">Analyzing your challenge…</h2>
+        <p class="loading-sub">Identifying interaction type and generating configuration. This usually takes a few seconds.</p>
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="step" id="step-3" aria-labelledby="s3-heading">
+      <a href="#" class="back-link" id="back-link" aria-label="Back to start — enter a new challenge">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to start
+      </a>
+
+      <h2 class="results-heading" id="s3-heading">Interaction Design Recommendation</h2>
+
+      <!-- Card 1: Recommended Interaction -->
+      <div class="card" id="card-recommendation">
+        <p class="card-title">Recommended Interaction</p>
+        <div class="interaction-badge" id="result-type">—</div>
+        <p class="card-rationale" id="result-rationale">—</p>
+      </div>
+
+      <!-- Card 2: Visual Theme -->
+      <div class="card" id="card-theme">
+        <p class="card-title">Visual Theme</p>
+        <div class="theme-row">
+          <div class="color-swatch" id="result-swatch" aria-hidden="true"></div>
+          <p class="theme-desc" id="result-theme">—</p>
+        </div>
+      </div>
+
+      <!-- Card 3: Plugin JSON Configuration -->
+      <div class="card" id="card-json">
+        <p class="card-title">Plugin JSON Configuration</p>
+
+        <div class="code-section">
+          <p class="code-label">HTML</p>
+          <div class="code-block">
+            <pre id="result-html-code">—</pre>
+          </div>
+          <button class="btn-copy" id="copy-html-btn" data-target="result-html-code">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Copy HTML
+          </button>
+        </div>
+
+        <div class="code-section">
+          <p class="code-label">Script</p>
+          <div class="code-block">
+            <pre id="result-script-code">—</pre>
+          </div>
+          <button class="btn-copy" id="copy-script-btn" data-target="result-script-code">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+            Copy Script
+          </button>
+        </div>
+      </div>
+
+      <!-- Card 4: Static Companion Text -->
+      <div class="card" id="card-static">
+        <p class="card-title">Static Companion Text</p>
+        <p class="static-text" id="result-static">—</p>
+        <button class="btn-copy" id="copy-static-btn" data-target="result-static-text" style="margin-top:14px;">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Copy Text
+        </button>
+        <!-- Hidden span for copy target -->
+        <span id="result-static-text" style="display:none;"></span>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ── CONFIG ──────────────────────────────────────────────────────────────
+    const USE_MOCK_API = true;
+    const CLAUDE_API_KEY = 'YOUR_API_KEY_HERE';
+
+    const SYSTEM_PROMPT = `You are an expert learning experience designer specializing in online course design for Coursera. You help learning designers at Duke Learning Innovation transform static course content into engaging interactive components that can be embedded directly in Coursera courses.
+
+You have deep knowledge of instructional design principles, adult learning theory, and the specific constraints of the Coursera platform. You are practical, specific, and always prioritize the learner's experience over technical complexity.
+
+---
+
+CONTEXT ABOUT THE TOOL:
+The designer will describe a content challenge in plain language. Your job is to:
+1. Analyze what kind of learning is happening (conceptual, procedural, affective, applied)
+2. Identify the specific problem with the current static approach
+3. Recommend the single best interaction type for this content and learning situation
+4. Generate a complete, ready-to-use Coursera plugin JSON configuration
+5. Generate a static companion text that covers the same content accessibly
+
+---
+
+AVAILABLE INTERACTION TYPES:
+You may only recommend from this list. Do not suggest anything outside it.
+
+- Tabbed explorer: best for multi-part concepts where each part is distinct and roughly equal in importance. Learners navigate at their own pace. Good for 3-6 tabs.
+- Accordion: best for content where learners may already know some sections or want to scan before reading. Good for term spotlights, FAQs, layered explanations.
+- Inline quiz: best for immediate reinforcement of a concept just introduced. Multiple choice with feedback. Good when there is a clearly correct answer the learner should be able to identify.
+- Click-to-reveal: best for definitions, short explanations, or anything where the reveal itself is part of the learning — the learner makes a prediction before seeing the answer.
+- Image hotspot: best when a visual (diagram, screenshot, interface, anatomy) is central to understanding. Learners click regions to reveal explanations.
+- Branching scenario: best for decision-making practice where context and consequences matter. Good for clinical, ethical, or professional judgment situations.
+
+---
+
+DECISION RULES:
+- If the content has 3 or more distinct components of roughly equal weight → tabs or accordion
+- If the content introduces new vocabulary → accordion or click-to-reveal
+- If the content has a visual at its center → image hotspot
+- If the content is asking learners to practice a judgment or decision → branching scenario
+- If the content just taught something and needs a quick check → inline quiz
+- When in doubt between two types, choose the simpler one
+- Never recommend branching scenario unless the content genuinely involves a decision with meaningful consequences
+- For coding or technical content in this tool, assume it is conceptual — not hands-on. Do not generate actual runnable code environments. Use visual styling that suggests a technical context without requiring code execution.
+
+---
+
+VISUAL DESIGN:
+
+STEP 1 — Always apply Duke brand foundations:
+
+Typography (all available via Google Fonts):
+- Primary UI font: Open Sans — use for all body text, labels, navigation, and interface elements
+- Display / heading font: Montserrat — use for interaction titles and section headers
+- Serif accent: EB Garamond or Playfair Display — use sparingly for pull quotes, callouts, or humanities content
+- Monospace: Roboto Mono — use for any code, data, or technical content only
+
+Core colors (always present):
+- Duke Navy Blue: #012169 — primary headers, active states, primary buttons
+- Duke Royal Blue: #00539B — secondary interactive elements, hover states
+- Whisper Gray: #F3F2F1 — default background for interaction containers
+- Hatteras: #E2E6ED — borders, dividers, inactive tab backgrounds
+- Cast Iron: #262626 — primary body text
+- Graphite: #666666 — secondary / muted text
+
+Accent colors (use one per interaction, chosen by discipline or content type):
+- Copper #C84E00 — professional, business, law
+- Persimmon #E89923 — warm accent for general / humanities content
+- Eno #339898 — health, clinical, life sciences
+- Prussian Blue #005587 — technical, data, computer science
+- Ironweed #993399 — social sciences, psychology, cognitive science
+- Piedmont #A1B70D — natural sciences, environment, biology
+- Shale Blue #0577B1 — engineering, quantitative fields
+
+Aesthetic rules that always apply:
+- Clean, minimal, generous whitespace
+- 0.5px borders using Hatteras (#E2E6ED)
+- Border radius: 8px for components, 12px for cards
+- No gradients, no drop shadows, no decorative textures
+- All interactions must meet WCAG 2.0 contrast requirements
+- Never adjust opacity or saturation of Duke Navy Blue or Duke Royal Blue
+
+STEP 2 — Detect the discipline and apply the appropriate theme
+
+STEP 3 — Match visual treatment to content type
+
+---
+
+CONSTRAINTS YOU MUST ALWAYS FOLLOW:
+- All interactions are ungraded — never suggest graded use
+- Every response must include a recommendation, JSON configuration, AND static companion text
+- The JSON must always have exactly two fields: "html" and "script"
+- The html field contains all markup and inline CSS — fully self-contained, no external dependencies, no external font calls
+- The script field contains all JavaScript — no inline onclick handlers, use addEventListener only
+- All fonts must be declared with a full fallback stack in case Google Fonts is unavailable
+- Static companion text must cover 100% of the content in the interaction in plain prose
+- Every interaction must be keyboard navigable and meet WCAG 2.0 contrast requirements
+
+---
+
+OUTPUT FORMAT:
+Respond in this exact JSON structure so the tool can parse your response reliably. No text before or after — only the JSON object.
+
+{
+  "recommendation": {
+    "type": "Name of interaction type",
+    "rationale": "2-3 sentences explaining why this type fits this specific content and learning situation."
+  },
+  "visual_theme": "One sentence describing the visual approach chosen and why.",
+  "json": {
+    "html": "complete self-contained HTML and CSS string with Duke brand applied",
+    "script": "complete JavaScript string using addEventListener only, no inline handlers"
+  },
+  "static": "Full static companion text in plain prose. 2-4 paragraphs."
+}`;
+
+    // ── MOCK DATA ────────────────────────────────────────────────────────────
+    const MOCK_RESPONSE = {
+      "recommendation": {
+        "type": "Accordion",
+        "rationale": "This content introduces five distinct nursing assessment frameworks that learners may encounter unevenly — some will already know SBAR, others will not. The accordion format lets learners scan all five terms at once and choose which to read in depth, respecting prior knowledge and reducing cognitive load. Because each framework is a discrete named concept with a structured explanation, the glossary-style accordion is the clearest match."
+      },
+      "visual_theme": "Clinical EHR aesthetic using Eno green (#339898) as the accent color, Roboto Mono for framework abbreviations to suggest clinical documentation, and structured row layouts that reference the visual language of electronic health record interfaces.",
+      "json": {
+        "html": "<div style=\"font-family: 'Open Sans', Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"font-family: 'Montserrat', Arial, sans-serif; color: #012169; font-size: 1.25rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"accordion-container\"></div></div>",
+        "script": "const frameworks = [{term: 'SBAR', def: 'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term: 'HEAD-TO-TOE', def: 'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term: 'OLDCARTS', def: 'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term: 'ABCDE', def: 'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term: 'CIWA-Ar', def: 'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; const container = document.getElementById('accordion-container'); frameworks.forEach((f, i) => { const item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; const btn = document.createElement('button'); btn.setAttribute('aria-expanded', 'false'); btn.style.cssText = 'width: 100%; text-align: left; padding: 14px 16px; background: white; border: none; cursor: pointer; font-family: Roboto Mono, Courier New, monospace; font-size: 0.95rem; color: #012169; display: flex; justify-content: space-between; align-items: center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; const panel = document.createElement('div'); panel.style.cssText = 'display: none; padding: 14px 16px; font-size: 0.9rem; color: #262626; border-top: 0.5px solid #E2E6ED; line-height: 1.6;'; panel.textContent = f.def; btn.addEventListener('click', () => { const open = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!open)); panel.style.display = open ? 'none' : 'block'; btn.querySelector('span').textContent = open ? '+' : '−'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); });"
+      },
+      "static": "Nursing practice relies on a set of standardized assessment frameworks that bring consistency and clarity to clinical documentation and communication. These frameworks are not interchangeable — each serves a distinct purpose and is applied in different clinical contexts, so nurses must understand when and why to use each one.\n\nSBAR (Situation, Background, Assessment, Recommendation) is the most widely used handoff communication tool in acute care settings. It gives nurses a predictable structure for reporting patient status changes to physicians or during shift transitions. HEAD-TO-TOE assessment is a systematic physical examination sequence that ensures no body system is overlooked during routine assessments.\n\nOLDCARTS guides symptom analysis by capturing the full character of a patient complaint — when it started, where it is, how long it lasts, what it feels like, and what makes it better or worse. ABCDE (Airway, Breathing, Circulation, Disability, Exposure) is the rapid primary survey framework used in emergency and deterioration scenarios. Finally, CIWA-Ar is a validated clinical instrument specifically for monitoring patients at risk of alcohol withdrawal, with scored items that guide medication decisions.\n\nTogether, these frameworks form the structural backbone of nursing assessment. Familiarity with all five — and clarity about when each applies — is foundational to safe, communicative practice."
+    };
+
+    // ── ACCENT COLOR DETECTION ───────────────────────────────────────────────
+    function detectAccentColor(themeText) {
+      const t = themeText.toLowerCase();
+      if (t.includes('#339898') || t.includes('eno')) return '#339898';
+      if (t.includes('#c84e00') || t.includes('copper')) return '#C84E00';
+      if (t.includes('#e89923') || t.includes('persimmon')) return '#E89923';
+      if (t.includes('#005587') || t.includes('prussian')) return '#005587';
+      if (t.includes('#993399') || t.includes('ironweed')) return '#993399';
+      if (t.includes('#a1b70d') || t.includes('piedmont')) return '#A1B70D';
+      if (t.includes('#0577b1') || t.includes('shale')) return '#0577B1';
+      if (t.includes('#00539b') || t.includes('royal')) return '#00539B';
+      return '#E89923'; // default persimmon
+    }
+
+    // ── API CALL ─────────────────────────────────────────────────────────────
+    async function callClaude(userInput) {
+      if (USE_MOCK_API) {
+        await new Promise(r => setTimeout(r, 1800));
+        return MOCK_RESPONSE;
+      }
+
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': CLAUDE_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 8192,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: userInput }]
+        })
+      });
+
+      if (!response.ok) {
+        const err = await response.text();
+        throw new Error(`API error ${response.status}: ${err}`);
+      }
+
+      const data = await response.json();
+      const text = data.content[0].text;
+      return JSON.parse(text);
+    }
+
+    // ── DOM REFS ─────────────────────────────────────────────────────────────
+    const steps = {
+      1: document.getElementById('step-1'),
+      2: document.getElementById('step-2'),
+      3: document.getElementById('step-3')
+    };
+    const stepLabel    = document.getElementById('step-label');
+    const textarea     = document.getElementById('challenge-input');
+    const charCount    = document.getElementById('char-count-hint');
+    const analyzeBtn   = document.getElementById('analyze-btn');
+    const errorBox     = document.getElementById('error-box');
+    const backLink     = document.getElementById('back-link');
+
+    // results
+    const resultType     = document.getElementById('result-type');
+    const resultRationale = document.getElementById('result-rationale');
+    const resultTheme    = document.getElementById('result-theme');
+    const resultSwatch   = document.getElementById('result-swatch');
+    const resultHtmlCode = document.getElementById('result-html-code');
+    const resultScriptCode = document.getElementById('result-script-code');
+    const resultStatic   = document.getElementById('result-static');
+    const resultStaticText = document.getElementById('result-static-text');
+
+    // ── STEP NAVIGATION ──────────────────────────────────────────────────────
+    function showStep(n) {
+      Object.values(steps).forEach(s => s.classList.remove('active'));
+      steps[n].classList.add('active');
+      stepLabel.textContent = `Step ${n} of 3`;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // ── CHAR COUNT ───────────────────────────────────────────────────────────
+    textarea.addEventListener('input', () => {
+      const len = textarea.value.length;
+      const remaining = 4000 - len;
+      const meetsMin = len >= 50;
+      charCount.textContent = `${len} / 4000${meetsMin ? '' : ' — 50 characters minimum to analyze'}`;
+      charCount.classList.toggle('warn', !meetsMin && len > 0);
+      analyzeBtn.disabled = !meetsMin;
+      analyzeBtn.setAttribute('aria-disabled', String(!meetsMin));
+      errorBox.style.display = 'none';
+    });
+
+    // ── ANALYZE ──────────────────────────────────────────────────────────────
+    analyzeBtn.addEventListener('click', async () => {
+      const input = textarea.value.trim();
+      if (input.length < 50) return;
+
+      errorBox.style.display = 'none';
+      showStep(2);
+
+      try {
+        const result = await callClaude(input);
+        populateResults(result);
+        showStep(3);
+      } catch (err) {
+        showStep(1);
+        errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
+        errorBox.style.display = 'block';
+      }
+    });
+
+    // ── POPULATE RESULTS ─────────────────────────────────────────────────────
+    function populateResults(data) {
+      // Card 1
+      resultType.textContent = data.recommendation.type;
+      resultRationale.textContent = data.recommendation.rationale;
+
+      // Card 2
+      resultTheme.textContent = data.visual_theme;
+      const accent = detectAccentColor(data.visual_theme);
+      resultSwatch.style.background = accent;
+      resultSwatch.setAttribute('title', `Accent color: ${accent}`);
+
+      // Card 3
+      resultHtmlCode.textContent = data.json.html;
+      resultScriptCode.textContent = data.json.script;
+
+      // Card 4
+      resultStatic.textContent = data.static;
+      resultStaticText.textContent = data.static;
+    }
+
+    // ── COPY BUTTONS ─────────────────────────────────────────────────────────
+    function setupCopy(btn, getTextFn, label) {
+      btn.addEventListener('click', async () => {
+        try {
+          const text = getTextFn();
+          await navigator.clipboard.writeText(text);
+          const origHTML = btn.innerHTML;
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.classList.remove('copied');
+          }, 1500);
+        } catch {
+          // fallback for non-secure contexts
+          const ta = document.createElement('textarea');
+          ta.value = getTextFn();
+          ta.style.position = 'fixed';
+          ta.style.opacity = '0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          document.body.removeChild(ta);
+          const origHTML = btn.innerHTML;
+          btn.textContent = 'Copied!';
+          btn.classList.add('copied');
+          setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.classList.remove('copied');
+          }, 1500);
+        }
+      });
+    }
+
+    setupCopy(
+      document.getElementById('copy-html-btn'),
+      () => resultHtmlCode.textContent
+    );
+    setupCopy(
+      document.getElementById('copy-script-btn'),
+      () => resultScriptCode.textContent
+    );
+    setupCopy(
+      document.getElementById('copy-static-btn'),
+      () => resultStaticText.textContent
+    );
+
+    // ── BACK LINK ────────────────────────────────────────────────────────────
+    backLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showStep(1);
+      textarea.focus();
+    });
+
+    // ── KEYBOARD: submit on Ctrl/Cmd+Enter ───────────────────────────────────
+    textarea.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !analyzeBtn.disabled) {
+        analyzeBtn.click();
+      }
+    });
+  </script>
+
+</body>
+</html>
