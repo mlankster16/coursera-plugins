@@ -34,7 +34,6 @@
       flex-direction: column;
     }
 
-    /* ── HEADER ── */
     .site-header {
       position: sticky;
       top: 0;
@@ -71,10 +70,7 @@
       flex-shrink: 0;
     }
 
-    .wordmark-d svg {
-      width: 20px;
-      height: 20px;
-    }
+    .wordmark-d svg { width: 20px; height: 20px; }
 
     .wordmark-text {
       display: flex;
@@ -107,7 +103,6 @@
       text-transform: uppercase;
     }
 
-    /* ── MAIN ── */
     main {
       flex: 1;
       max-width: 800px;
@@ -116,22 +111,14 @@
       padding: 40px 24px 64px;
     }
 
-    /* ── STEPS ── */
-    .step {
-      display: none;
-      animation: fadeIn 0.3s ease;
-    }
-
-    .step.active {
-      display: block;
-    }
+    .step { display: none; animation: fadeIn 0.3s ease; }
+    .step.active { display: block; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(8px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
-    /* ── STEP 1 ── */
     .step1-heading {
       font-family: 'Montserrat', Arial, sans-serif;
       font-weight: 700;
@@ -180,20 +167,10 @@
       box-shadow: 0 0 0 3px rgba(0, 83, 155, 0.15);
     }
 
-    .challenge-textarea::placeholder {
-      color: #aab;
-    }
+    .challenge-textarea::placeholder { color: #aab; }
 
-    .char-count {
-      font-size: 0.78rem;
-      color: var(--graphite);
-      margin-top: 6px;
-      text-align: right;
-    }
-
-    .char-count.warn {
-      color: var(--persimmon);
-    }
+    .char-count { font-size: 0.78rem; color: var(--graphite); margin-top: 6px; text-align: right; }
+    .char-count.warn { color: var(--persimmon); }
 
     .btn-primary {
       display: inline-flex;
@@ -211,33 +188,27 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
-      transition: background 0.15s, box-shadow 0.15s;
+      transition: background 0.15s;
       text-decoration: none;
     }
 
-    .btn-primary:hover:not(:disabled) {
-      background: var(--royal);
-    }
+    .btn-primary:hover:not(:disabled) { background: var(--royal); }
+    .btn-primary:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
+    .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
 
-    .btn-primary:focus-visible {
-      outline: 3px solid var(--persimmon);
-      outline-offset: 3px;
-    }
+    #step-2.step-2--loading .s2-loading { display: flex; }
+    #step-2.step-2--loading .s2-preview { display: none; }
+    #step-2.step-2--preview .s2-loading { display: none; }
+    #step-2.step-2--preview .s2-preview { display: block; }
 
-    .btn-primary:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    /* ── STEP 2 — LOADING ── */
-    .loading-center {
-      display: flex;
+    .s2-loading {
       flex-direction: column;
       align-items: center;
       justify-content: center;
       min-height: 320px;
       text-align: center;
       gap: 20px;
+      display: none;
     }
 
     .spinner {
@@ -249,9 +220,7 @@
       animation: spin 0.8s linear infinite;
     }
 
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     .loading-heading {
       font-family: 'Montserrat', Arial, sans-serif;
@@ -260,14 +229,132 @@
       color: var(--navy);
     }
 
-    .loading-sub {
-      font-size: 0.88rem;
-      color: var(--graphite);
-      line-height: 1.5;
-      max-width: 380px;
+    .loading-sub { font-size: 0.88rem; color: var(--graphite); line-height: 1.5; max-width: 380px; }
+
+    .s2-preview { display: none; }
+
+    .s2-topbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+
+    .s2-badge {
+      display: inline-block;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.82rem;
+      padding: 5px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.03em;
     }
 
-    /* ── STEP 3 — RESULTS ── */
+    .s2-start-over {
+      font-size: 0.82rem;
+      color: var(--royal);
+      text-decoration: none;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border-bottom: 1px solid transparent;
+      transition: border-color 0.15s;
+      padding: 4px 0;
+    }
+
+    .s2-start-over:hover { border-bottom-color: var(--royal); }
+    .s2-start-over:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; border-radius: 3px; }
+
+    .s2-rationale { font-size: 0.9rem; color: var(--graphite); font-style: italic; line-height: 1.6; margin-bottom: 20px; }
+
+    .s2-preview-label {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.68rem;
+      color: var(--graphite);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    #preview-wrapper { position: relative; border-radius: 8px; overflow: hidden; margin-bottom: 24px; }
+
+    #preview-iframe {
+      width: 100%;
+      min-height: 320px;
+      border: 0.5px solid var(--hatteras);
+      border-radius: 8px;
+      background: var(--white);
+      display: block;
+    }
+
+    .preview-shimmer {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, var(--hatteras) 25%, #f0f2f5 50%, var(--hatteras) 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 8px;
+      display: none;
+    }
+
+    .preview-shimmer.visible { display: block; }
+
+    @keyframes shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .s2-type-label {
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.72rem;
+      color: var(--graphite);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .s2-type-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; align-items: center; }
+
+    .type-pill {
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: border-color 0.15s, color 0.15s, background 0.15s;
+      border: 0.5px solid var(--navy);
+      background: var(--white);
+      color: var(--navy);
+    }
+
+    .type-pill:hover:not(.active):not(:disabled) { border-color: var(--royal); color: var(--royal); }
+    .type-pill.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
+    .type-pill:disabled { opacity: 0.5; cursor: not-allowed; }
+    .type-pill:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
+
+    .s2-regenerating { font-size: 0.78rem; color: var(--graphite); font-style: italic; display: none; margin-top: 6px; }
+    .s2-regenerating.visible { display: block; }
+
+    .s2-confirm-btn {
+      display: block;
+      width: 100%;
+      margin-top: 24px;
+      padding: 16px 28px;
+      background: var(--navy);
+      color: var(--white);
+      font-family: 'Montserrat', Arial, sans-serif;
+      font-weight: 600;
+      font-size: 0.95rem;
+      letter-spacing: 0.03em;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: center;
+    }
+
+    .s2-confirm-btn:hover { background: var(--royal); }
+    .s2-confirm-btn:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
+
     .back-link {
       display: inline-flex;
       align-items: center;
@@ -283,44 +370,18 @@
       transition: border-color 0.15s;
     }
 
-    .back-link:hover {
-      border-bottom-color: var(--royal);
-    }
-
-    .back-link:focus-visible {
-      outline: 3px solid var(--persimmon);
-      outline-offset: 3px;
-      border-radius: 3px;
-    }
+    .back-link:hover { border-bottom-color: var(--royal); }
+    .back-link:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; border-radius: 3px; }
 
     .results-heading {
       font-family: 'Montserrat', Arial, sans-serif;
       font-weight: 700;
       font-size: 1.4rem;
       color: var(--navy);
-      margin-bottom: 24px;
+      margin-bottom: 8px;
     }
 
-    .card {
-      background: var(--white);
-      border: 0.5px solid var(--hatteras);
-      border-radius: 12px;
-      padding: 24px 28px;
-      margin-bottom: 16px;
-    }
-
-    .card-title {
-      font-family: 'Montserrat', Arial, sans-serif;
-      font-weight: 600;
-      font-size: 0.72rem;
-      color: var(--graphite);
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      margin-bottom: 14px;
-    }
-
-    /* Card 1 */
-    .interaction-badge {
+    .s3-badge {
       display: inline-block;
       background: var(--navy);
       color: var(--white);
@@ -329,74 +390,22 @@
       font-size: 0.82rem;
       padding: 5px 14px;
       border-radius: 20px;
-      margin-bottom: 14px;
+      margin-bottom: 24px;
       letter-spacing: 0.03em;
     }
 
-    .card-rationale {
-      font-size: 0.92rem;
-      color: var(--cast-iron);
-      line-height: 1.65;
-    }
+    .card { background: var(--white); border: 0.5px solid var(--hatteras); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
+    .card-title { font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--graphite); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
 
-    /* Card 2 */
-    .theme-row {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-    }
+    .theme-row { display: flex; align-items: flex-start; gap: 14px; }
+    .color-swatch { width: 36px; height: 36px; border-radius: 6px; border: 0.5px solid var(--hatteras); flex-shrink: 0; }
+    .theme-desc { font-size: 0.92rem; color: var(--cast-iron); line-height: 1.65; font-style: italic; }
 
-    .color-swatch {
-      width: 36px;
-      height: 36px;
-      border-radius: 6px;
-      border: 0.5px solid var(--hatteras);
-      flex-shrink: 0;
-    }
-
-    .theme-desc {
-      font-size: 0.92rem;
-      color: var(--cast-iron);
-      line-height: 1.65;
-      font-style: italic;
-    }
-
-    /* Card 3 */
-    .code-section {
-      margin-bottom: 18px;
-    }
-
-    .code-section:last-child {
-      margin-bottom: 0;
-    }
-
-    .code-label {
-      font-family: 'Montserrat', Arial, sans-serif;
-      font-weight: 600;
-      font-size: 0.72rem;
-      color: var(--graphite);
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin-bottom: 8px;
-    }
-
-    .code-block {
-      background: var(--code-bg);
-      border-radius: 8px;
-      padding: 16px;
-      overflow-x: auto;
-      position: relative;
-    }
-
-    .code-block pre {
-      font-family: 'Roboto Mono', 'Courier New', Courier, monospace;
-      font-size: 0.8rem;
-      color: var(--code-fg);
-      line-height: 1.55;
-      white-space: pre-wrap;
-      word-break: break-all;
-      margin: 0;
-    }
+    .code-section { margin-bottom: 18px; }
+    .code-section:last-child { margin-bottom: 0; }
+    .code-label { font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--graphite); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 8px; }
+    .code-block { background: var(--code-bg); border-radius: 8px; padding: 16px; overflow-x: auto; position: relative; }
+    .code-block pre { font-family: 'Roboto Mono', 'Courier New', Courier, monospace; font-size: 0.8rem; color: var(--code-fg); line-height: 1.55; white-space: pre-wrap; word-break: break-all; margin: 0; }
 
     .btn-copy {
       display: inline-flex;
@@ -416,49 +425,21 @@
       letter-spacing: 0.02em;
     }
 
-    .btn-copy:hover {
-      background: var(--royal);
-      color: var(--white);
-    }
+    .btn-copy:hover { background: var(--royal); color: var(--white); }
+    .btn-copy:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
+    .btn-copy.copied { background: #2d7a2d; border-color: #2d7a2d; color: var(--white); }
 
-    .btn-copy:focus-visible {
-      outline: 3px solid var(--persimmon);
-      outline-offset: 3px;
-    }
+    .static-text { font-size: 0.92rem; color: var(--cast-iron); line-height: 1.7; white-space: pre-wrap; }
 
-    .btn-copy.copied {
-      background: #2d7a2d;
-      border-color: #2d7a2d;
-      color: var(--white);
-    }
+    .error-box { background: #fff3f0; border: 0.5px solid #e89923; border-radius: 8px; padding: 16px 20px; margin-top: 16px; font-size: 0.88rem; color: #7a3300; display: none; }
 
-    /* Card 4 */
-    .static-text {
-      font-size: 0.92rem;
-      color: var(--cast-iron);
-      line-height: 1.7;
-      white-space: pre-wrap;
-    }
-
-    /* ── ERROR ── */
-    .error-box {
-      background: #fff3f0;
-      border: 0.5px solid #e89923;
-      border-radius: 8px;
-      padding: 16px 20px;
-      margin-top: 16px;
-      font-size: 0.88rem;
-      color: #7a3300;
-      display: none;
-    }
-
-    /* ── RESPONSIVE ── */
     @media (max-width: 600px) {
       .step1-heading { font-size: 1.3rem; }
       .btn-primary { width: 100%; }
       .card { padding: 20px 18px; }
       .header-inner { padding: 0 16px; }
       main { padding: 28px 16px 48px; }
+      .s2-confirm-btn { font-size: 0.88rem; }
     }
   </style>
 </head>
@@ -507,31 +488,64 @@
     </section>
 
     <!-- STEP 2 -->
-    <section class="step" id="step-2" aria-labelledby="s2-heading" aria-live="assertive">
-      <div class="loading-center">
+    <section class="step step-2--loading" id="step-2" aria-labelledby="s2-heading" aria-live="assertive">
+
+      <!-- Substate A: Loading -->
+      <div class="s2-loading" id="s2-loading-area">
         <div class="spinner" role="status" aria-hidden="true"></div>
-        <h2 class="loading-heading" id="s2-heading">Analyzing your challenge…</h2>
-        <p class="loading-sub">Identifying interaction type and generating configuration. This usually takes a few seconds.</p>
+        <h2 class="loading-heading" id="s2-heading">Analyzing your challenge...</h2>
+        <p class="loading-sub">Identifying interaction type and generating configuration...</p>
       </div>
+
+      <!-- Substate B: Preview -->
+      <div class="s2-preview" id="s2-preview-area">
+        <div class="s2-topbar">
+          <span class="s2-badge" id="s2-recommendation-badge">Recommended: —</span>
+          <a href="#" class="s2-start-over" id="s2-start-over">
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true" style="vertical-align:middle;margin-right:3px;"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Start over
+          </a>
+        </div>
+
+        <p class="s2-rationale" id="s2-rationale-text"></p>
+
+        <p class="s2-preview-label">Live Preview</p>
+        <div id="preview-wrapper">
+          <div class="preview-shimmer" id="preview-shimmer"></div>
+          <iframe
+            id="preview-iframe"
+            sandbox="allow-scripts"
+            title="Interaction preview"
+            aria-label="Live preview of the generated interaction"
+          ></iframe>
+        </div>
+
+        <p class="s2-type-label">Try a different interaction type</p>
+        <div class="s2-type-buttons" id="s2-type-buttons" role="group" aria-label="Interaction type options">
+          <button class="type-pill" data-type="Accordion">Accordion</button>
+          <button class="type-pill" data-type="Tabbed Explorer">Tabbed explorer</button>
+          <button class="type-pill" data-type="Inline Quiz">Inline quiz</button>
+          <button class="type-pill" data-type="Click-to-Reveal">Click-to-reveal</button>
+          <button class="type-pill" data-type="Image Hotspot">Image hotspot</button>
+          <button class="type-pill" data-type="Branching Scenario">Branching scenario</button>
+        </div>
+        <p class="s2-regenerating" id="s2-regenerating">Regenerating...</p>
+
+        <button class="s2-confirm-btn" id="s2-confirm-btn">Confirm this recommendation &#8594;</button>
+      </div>
+
     </section>
 
     <!-- STEP 3 -->
     <section class="step" id="step-3" aria-labelledby="s3-heading">
-      <a href="#" class="back-link" id="back-link" aria-label="Back to start — enter a new challenge">
+      <a href="#" class="back-link" id="back-to-preview-link">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        Back to start
+        Back to preview
       </a>
 
-      <h2 class="results-heading" id="s3-heading">Interaction Design Recommendation</h2>
+      <h2 class="results-heading" id="s3-heading">Your Plugin Configuration</h2>
+      <div class="s3-badge" id="s3-type-badge">—</div>
 
-      <!-- Card 1: Recommended Interaction -->
-      <div class="card" id="card-recommendation">
-        <p class="card-title">Recommended Interaction</p>
-        <div class="interaction-badge" id="result-type">—</div>
-        <p class="card-rationale" id="result-rationale">—</p>
-      </div>
-
-      <!-- Card 2: Visual Theme -->
       <div class="card" id="card-theme">
         <p class="card-title">Visual Theme</p>
         <div class="theme-row">
@@ -540,7 +554,6 @@
         </div>
       </div>
 
-      <!-- Card 3: Plugin JSON Configuration -->
       <div class="card" id="card-json">
         <p class="card-title">Plugin JSON Configuration</p>
 
@@ -549,7 +562,7 @@
           <div class="code-block">
             <pre id="result-html-code">—</pre>
           </div>
-          <button class="btn-copy" id="copy-html-btn" data-target="result-html-code">
+          <button class="btn-copy" id="copy-html-btn">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
             Copy HTML
           </button>
@@ -560,22 +573,20 @@
           <div class="code-block">
             <pre id="result-script-code">—</pre>
           </div>
-          <button class="btn-copy" id="copy-script-btn" data-target="result-script-code">
+          <button class="btn-copy" id="copy-script-btn">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
             Copy Script
           </button>
         </div>
       </div>
 
-      <!-- Card 4: Static Companion Text -->
       <div class="card" id="card-static">
         <p class="card-title">Static Companion Text</p>
         <p class="static-text" id="result-static">—</p>
-        <button class="btn-copy" id="copy-static-btn" data-target="result-static-text" style="margin-top:14px;">
+        <button class="btn-copy" id="copy-static-btn" style="margin-top:14px;">
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           Copy Text
         </button>
-        <!-- Hidden span for copy target -->
         <span id="result-static-text" style="display:none;"></span>
       </div>
     </section>
@@ -583,7 +594,6 @@
   </main>
 
   <script>
-    // ── CONFIG ──────────────────────────────────────────────────────────────
     const USE_MOCK_API = true;
     const CLAUDE_API_KEY = 'YOUR_API_KEY_HERE';
 
@@ -696,21 +706,87 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
   "static": "Full static companion text in plain prose. 2-4 paragraphs."
 }`;
 
-    // ── MOCK DATA ────────────────────────────────────────────────────────────
-    const MOCK_RESPONSE = {
-      "recommendation": {
+    const MOCK_RESPONSES = {
+      "Accordion": {
         "type": "Accordion",
-        "rationale": "This content introduces five distinct nursing assessment frameworks that learners may encounter unevenly — some will already know SBAR, others will not. The accordion format lets learners scan all five terms at once and choose which to read in depth, respecting prior knowledge and reducing cognitive load. Because each framework is a discrete named concept with a structured explanation, the glossary-style accordion is the clearest match."
+        "recommendation": {
+          "type": "Accordion",
+          "rationale": "This content introduces five distinct nursing assessment frameworks that learners may encounter unevenly — some will already know SBAR, others will not. The accordion format lets learners scan all five terms at once and choose which to read in depth, respecting prior knowledge and reducing cognitive load. Because each framework is a discrete named concept with a structured explanation, the glossary-style accordion is the clearest match."
+        },
+        "visual_theme": "Clinical EHR aesthetic using Eno green (#339898) as the accent color, Roboto Mono for framework abbreviations to suggest clinical documentation, and structured row layouts that reference the visual language of electronic health record interfaces.",
+        "json": {
+          "html": "<div style=\"font-family: 'Open Sans', Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"font-family: 'Montserrat', Arial, sans-serif; color: #012169; font-size: 1.25rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"accordion-container\"></div></div>",
+          "script": "const frameworks = [{term: 'SBAR', def: 'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term: 'HEAD-TO-TOE', def: 'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term: 'OLDCARTS', def: 'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term: 'ABCDE', def: 'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term: 'CIWA-Ar', def: 'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; const container = document.getElementById('accordion-container'); frameworks.forEach((f, i) => { const item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; const btn = document.createElement('button'); btn.setAttribute('aria-expanded', 'false'); btn.style.cssText = 'width: 100%; text-align: left; padding: 14px 16px; background: white; border: none; cursor: pointer; font-family: Roboto Mono, Courier New, monospace; font-size: 0.95rem; color: #012169; display: flex; justify-content: space-between; align-items: center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; const panel = document.createElement('div'); panel.style.cssText = 'display: none; padding: 14px 16px; font-size: 0.9rem; color: #262626; border-top: 0.5px solid #E2E6ED; line-height: 1.6;'; panel.textContent = f.def; btn.addEventListener('click', () => { const open = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!open)); panel.style.display = open ? 'none' : 'block'; btn.querySelector('span').textContent = open ? '+' : '-'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); });"
+        },
+        "static": "Nursing practice relies on a set of standardized assessment frameworks that bring consistency and clarity to clinical documentation and communication. These frameworks are not interchangeable — each serves a distinct purpose and is applied in different clinical contexts, so nurses must understand when and why to use each one.\n\nSBAR (Situation, Background, Assessment, Recommendation) is the most widely used handoff communication tool in acute care settings. It gives nurses a predictable structure for reporting patient status changes to physicians or during shift transitions. HEAD-TO-TOE assessment is a systematic physical examination sequence that ensures no body system is overlooked during routine assessments.\n\nOLDCARTS guides symptom analysis by capturing the full character of a patient complaint — when it started, where it is, how long it lasts, what it feels like, and what makes it better or worse. ABCDE (Airway, Breathing, Circulation, Disability, Exposure) is the rapid primary survey framework used in emergency and deterioration scenarios. Finally, CIWA-Ar is a validated clinical instrument specifically for monitoring patients at risk of alcohol withdrawal, with scored items that guide medication decisions.\n\nTogether, these frameworks form the structural backbone of nursing assessment. Familiarity with all five — and clarity about when each applies — is foundational to safe, communicative practice."
       },
-      "visual_theme": "Clinical EHR aesthetic using Eno green (#339898) as the accent color, Roboto Mono for framework abbreviations to suggest clinical documentation, and structured row layouts that reference the visual language of electronic health record interfaces.",
-      "json": {
-        "html": "<div style=\"font-family: 'Open Sans', Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"font-family: 'Montserrat', Arial, sans-serif; color: #012169; font-size: 1.25rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"accordion-container\"></div></div>",
-        "script": "const frameworks = [{term: 'SBAR', def: 'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term: 'HEAD-TO-TOE', def: 'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term: 'OLDCARTS', def: 'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term: 'ABCDE', def: 'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term: 'CIWA-Ar', def: 'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; const container = document.getElementById('accordion-container'); frameworks.forEach((f, i) => { const item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; const btn = document.createElement('button'); btn.setAttribute('aria-expanded', 'false'); btn.style.cssText = 'width: 100%; text-align: left; padding: 14px 16px; background: white; border: none; cursor: pointer; font-family: Roboto Mono, Courier New, monospace; font-size: 0.95rem; color: #012169; display: flex; justify-content: space-between; align-items: center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; const panel = document.createElement('div'); panel.style.cssText = 'display: none; padding: 14px 16px; font-size: 0.9rem; color: #262626; border-top: 0.5px solid #E2E6ED; line-height: 1.6;'; panel.textContent = f.def; btn.addEventListener('click', () => { const open = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!open)); panel.style.display = open ? 'none' : 'block'; btn.querySelector('span').textContent = open ? '+' : '−'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); });"
+      "Tabbed Explorer": {
+        "type": "Tabbed Explorer",
+        "recommendation": {
+          "type": "Tabbed Explorer",
+          "rationale": "Five discrete frameworks of equal conceptual weight map naturally to five tabs, giving learners a side-by-side navigation experience without needing to scroll through a long page. Tabs allow focused reading of one framework at a time while keeping all other options persistently visible, which supports comparison and deliberate exploration. This format is well-suited when each item has parallel internal structure — full name, use context, and key components — as all five frameworks do."
+        },
+        "visual_theme": "Duke identity palette with Duke Navy (#012169) for active tab labels and selected underlines, Hatteras (#E2E6ED) for inactive tab backgrounds, and Eno green (#339898) as the accent color on component lists and in-tab headings to reinforce the clinical context.",
+        "json": {
+          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"color: #012169; font-size: 1.2rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"tab-nx-tablist\" role=\"tablist\" style=\"display: flex; border-bottom: 2px solid #012169; gap: 4px;\"></div><div id=\"tab-nx-panels\"></div></div>",
+          "script": "var tabs = [{id:'sbar',label:'SBAR',full:'Situation, Background, Assessment, Recommendation',when:'Use during patient handoffs, shift changes, and urgent physician notifications.',steps:['Situation: State who you are, the patient, and the current concern.','Background: Provide relevant history, diagnosis, and recent changes.','Assessment: Share your clinical interpretation of what is happening.','Recommendation: State clearly what you need or suggest next.']},{id:'h2t',label:'HEAD-TO-TOE',full:'Head-to-Toe Assessment',when:'Use during admission assessments, routine shift assessments, and post-procedure evaluations.',steps:['Neurological: Level of consciousness, orientation, pupils.','Respiratory: Breath sounds, rate, effort, oxygen saturation.','Cardiovascular: Heart sounds, peripheral pulses, edema.','Abdomen: Bowel sounds, tenderness, distension.','Integumentary: Skin color, turgor, wounds, pressure areas.']},{id:'old',label:'OLDCARTS',full:'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity',when:'Use when a patient presents with a new or changing symptom requiring structured symptom analysis.',steps:['Onset: When did it start and what were you doing?','Location: Where is it? Does it radiate?','Duration: How long does it last each time?','Character: How would you describe it (sharp, dull, burning)?','Aggravating / Alleviating factors: What makes it worse or better?','Timing: Is it constant or intermittent?','Severity: Rate on a 0-10 scale.']},{id:'abc',label:'ABCDE',full:'Airway, Breathing, Circulation, Disability, Exposure',when:'Use during rapid response situations, trauma assessments, and any scenario of acute patient deterioration.',steps:['Airway: Is it patent? Any obstruction or stridor?','Breathing: Rate, depth, symmetry, oxygen saturation.','Circulation: Pulse rate and quality, blood pressure, skin perfusion.','Disability: AVPU scale or GCS, blood glucose.','Exposure: Expose the patient fully to identify injuries, rashes, or bleeding.']},{id:'ciwa',label:'CIWA-Ar',full:'Clinical Institute Withdrawal Assessment for Alcohol, Revised',when:'Use for patients with known or suspected alcohol use disorder who are at risk of withdrawal, typically within 24-72 hours of last drink.',steps:['Nausea and vomiting: Scored 0-7.','Tremor: Observe outstretched hands, scored 0-7.','Paroxysmal sweats: Observe for diaphoresis, scored 0-7.','Anxiety: Observe affect and patient report, scored 0-7.','Agitation: Observe behavior during assessment, scored 0-7.','Perceptual disturbances: Tactile, visual, auditory, scored 0-7 each.','Headache: Patient report, scored 0-7.','Orientation: Scored 0-4. Total score guides treatment.']}]; var tablist = document.getElementById('tab-nx-tablist'); var panels = document.getElementById('tab-nx-panels'); tabs.forEach(function(t, i) { var btn = document.createElement('button'); btn.id = 'tab-nx-btn-' + t.id; btn.setAttribute('role','tab'); btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false'); btn.setAttribute('aria-controls','tab-nx-panel-' + t.id); btn.textContent = t.label; btn.style.cssText = 'padding: 10px 14px; border: none; cursor: pointer; font-size: 0.82rem; font-family: Courier New, monospace; font-weight: bold; border-radius: 4px 4px 0 0; transition: background 0.15s;'; btn.style.background = i === 0 ? '#012169' : '#E2E6ED'; btn.style.color = i === 0 ? 'white' : '#012169'; tablist.appendChild(btn); var panel = document.createElement('div'); panel.id = 'tab-nx-panel-' + t.id; panel.setAttribute('role','tabpanel'); panel.setAttribute('aria-labelledby','tab-nx-btn-' + t.id); panel.style.cssText = 'padding: 20px; background: white; border: 1px solid #E2E6ED; border-top: none; display: ' + (i === 0 ? 'block' : 'none') + ';'; panel.innerHTML = '<p style=\"color:#339898;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 4px;\">Full Name</p><p style=\"color:#012169;font-size:1rem;font-weight:bold;margin:0 0 14px;\">' + t.full + '</p><p style=\"color:#339898;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 4px;\">When to Use</p><p style=\"color:#262626;font-size:0.9rem;margin:0 0 14px;line-height:1.5;\">' + t.when + '</p><p style=\"color:#339898;font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;margin:0 0 8px;\">Key Components</p><ul style=\"margin:0;padding-left:18px;\">' + t.steps.map(function(s){ return '<li style=\"color:#262626;font-size:0.88rem;line-height:1.6;margin-bottom:4px;\">' + s + '</li>'; }).join('') + '</ul>'; panels.appendChild(panel); btn.addEventListener('click', function() { tabs.forEach(function(tt, j) { var b = document.getElementById('tab-nx-btn-' + tt.id); var p = document.getElementById('tab-nx-panel-' + tt.id); if (j === i) { b.setAttribute('aria-selected','true'); b.style.background = '#012169'; b.style.color = 'white'; p.style.display = 'block'; } else { b.setAttribute('aria-selected','false'); b.style.background = '#E2E6ED'; b.style.color = '#012169'; p.style.display = 'none'; } }); }); });"
+        },
+        "static": "Five standardized frameworks guide nursing assessment across different clinical contexts. Rather than applying a single approach to every patient encounter, nurses select the appropriate framework based on the situation — a structured handoff, a routine head-to-toe examination, a symptom complaint, an emergency, or a withdrawal risk.\n\nSBAR provides a four-part script for clinical communication, ensuring that all essential information is conveyed in a predictable order during handoffs or escalations. HEAD-TO-TOE gives nurses a sequential examination structure that covers every body system, reducing the risk of overlooked findings. OLDCARTS structures the symptom history interview, capturing onset, location, duration, character, aggravating and relieving factors, timing, and severity.\n\nABCDE is the rapid primary survey used in acute deterioration and trauma scenarios. It prioritizes threats to life in the order most likely to cause rapid harm — airway obstruction first, then breathing failure, circulatory collapse, neurological disability, and finally full exposure to identify hidden injuries. CIWA-Ar is a specialized scoring tool used to monitor patients at risk for alcohol withdrawal, with individual items scored on structured scales that sum to a total guiding intervention decisions.\n\nLearning these five frameworks as a set — understanding the purpose each serves and the context in which each applies — prepares nursing students to respond appropriately across the full range of assessment situations they will encounter in clinical practice."
       },
-      "static": "Nursing practice relies on a set of standardized assessment frameworks that bring consistency and clarity to clinical documentation and communication. These frameworks are not interchangeable — each serves a distinct purpose and is applied in different clinical contexts, so nurses must understand when and why to use each one.\n\nSBAR (Situation, Background, Assessment, Recommendation) is the most widely used handoff communication tool in acute care settings. It gives nurses a predictable structure for reporting patient status changes to physicians or during shift transitions. HEAD-TO-TOE assessment is a systematic physical examination sequence that ensures no body system is overlooked during routine assessments.\n\nOLDCARTS guides symptom analysis by capturing the full character of a patient complaint — when it started, where it is, how long it lasts, what it feels like, and what makes it better or worse. ABCDE (Airway, Breathing, Circulation, Disability, Exposure) is the rapid primary survey framework used in emergency and deterioration scenarios. Finally, CIWA-Ar is a validated clinical instrument specifically for monitoring patients at risk of alcohol withdrawal, with scored items that guide medication decisions.\n\nTogether, these frameworks form the structural backbone of nursing assessment. Familiarity with all five — and clarity about when each applies — is foundational to safe, communicative practice."
+      "Inline Quiz": {
+        "type": "Inline Quiz",
+        "recommendation": {
+          "type": "Inline Quiz",
+          "rationale": "An inline quiz activates retrieval practice at the point of learning, which research consistently shows improves long-term retention more than re-reading. This scenario-based question tests learners' ability to apply framework knowledge to a realistic clinical situation rather than simply recall a definition. The single-question format keeps cognitive load low while still creating a meaningful test of contextual understanding."
+        },
+        "visual_theme": "Clean clinical white cards with Eno green (#339898) for correct answer feedback and confirmation states, Duke Copper (#C84E00) for incorrect answer feedback, and Duke Navy (#012169) for question framing — creating an assessment interface that reads as authoritative and clinical rather than gamified.",
+        "json": {
+          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 680px; margin: 0 auto; padding: 28px; background: #F3F2F1;\"><div style=\"background: white; border-radius: 10px; padding: 24px; box-shadow: 0 1px 4px rgba(0,0,0,0.1);\"><p style=\"font-size: 0.78rem; color: #339898; text-transform: uppercase; letter-spacing: 0.1em; margin: 0 0 8px;\">Clinical Scenario</p><h2 style=\"color: #012169; font-size: 1rem; line-height: 1.5; margin: 0 0 20px;\">You are a floor nurse who has just assessed a patient with new-onset shortness of breath. Your attending physician is not at the bedside. Which framework should guide the information you communicate when you call the physician?</h2><div id=\"quiz-options\"></div><div id=\"quiz-feedback\" style=\"display:none; margin-top: 16px; padding: 14px; border-radius: 8px; font-size: 0.9rem; line-height: 1.6;\"></div></div></div>",
+          "script": "var options = [{label:'A',text:'OLDCARTS — to systematically describe the symptom onset and character.',correct:false,rationale:'OLDCARTS is used to structure a symptom history from the patient, not to organize communication with a physician. It captures detailed symptom characteristics but does not provide the communication scaffolding needed for a clinical handoff.'},{label:'B',text:'SBAR — to structure the situation, background, assessment, and recommendation for the physician.',correct:true,rationale:'Correct. SBAR is specifically designed for structured clinical communication between care team members. It ensures the physician receives the situation (what is happening), background (relevant history), your assessment (clinical interpretation), and a clear recommendation or request — in a format they expect.'},{label:'C',text:'ABCDE — to present your findings in order of physiological priority.',correct:false,rationale:'ABCDE is a rapid primary survey framework used at the bedside to assess and address life threats in sequence. It guides your own assessment actions, but it is not a communication framework for relaying information to a colleague.'},{label:'D',text:'HEAD-TO-TOE — to report every body system finding to the physician.',correct:false,rationale:'HEAD-TO-TOE is a comprehensive physical assessment sequence useful for documentation and routine evaluation. Reporting every finding to a physician during an urgent call would not be efficient or appropriate — a focused, structured communication framework like SBAR is needed instead.'}]; var container = document.getElementById('quiz-options'); var feedback = document.getElementById('quiz-feedback'); var answered = false; options.forEach(function(opt) { var btn = document.createElement('button'); btn.style.cssText = 'display: block; width: 100%; text-align: left; margin-bottom: 10px; padding: 12px 16px; border: 1.5px solid #E2E6ED; border-radius: 8px; background: white; cursor: pointer; font-size: 0.88rem; color: #262626; line-height: 1.5; transition: border-color 0.15s;'; btn.innerHTML = '<strong style=\"color:#012169;\">' + opt.label + '.</strong> ' + opt.text; btn.addEventListener('mouseover', function() { if (!answered) btn.style.borderColor = '#339898'; }); btn.addEventListener('mouseout', function() { if (!answered) btn.style.borderColor = '#E2E6ED'; }); btn.addEventListener('click', function() { if (answered) return; answered = true; if (opt.correct) { btn.style.borderColor = '#339898'; btn.style.background = '#E8F5F5'; feedback.style.display = 'block'; feedback.style.background = '#E8F5F5'; feedback.style.border = '1.5px solid #339898'; feedback.style.color = '#1a6060'; feedback.innerHTML = '<strong style=\"color:#339898;\">Correct.</strong> ' + opt.rationale; } else { btn.style.borderColor = '#C84E00'; btn.style.background = '#FDF0EA'; feedback.style.display = 'block'; feedback.style.background = '#FDF0EA'; feedback.style.border = '1.5px solid #C84E00'; feedback.style.color = '#7a2e00'; feedback.innerHTML = '<strong style=\"color:#C84E00;\">Not quite.</strong> ' + opt.rationale; } }); container.appendChild(btn); });"
+        },
+        "static": "Clinical judgment in nursing depends not only on knowing what a framework contains, but on knowing which framework to reach for in a given moment. This question presents a scenario that a floor nurse will encounter routinely — a patient with a new symptom and the need to communicate urgently with a physician who is not present.\n\nThe correct answer is SBAR. When communicating across care team members, especially in urgent or time-sensitive situations, SBAR provides a shared structure that both the nurse and the physician expect. The physician can anticipate that they will first hear the situation, then the background context, then the nurse's assessment, and finally a specific recommendation or request.\n\nOLDCARTS, ABCDE, and HEAD-TO-TOE are all legitimate clinical frameworks but serve different purposes. OLDCARTS structures the nurse's own interview with the patient about a symptom. ABCDE guides the nurse's rapid bedside assessment of physiological status. HEAD-TO-TOE supports comprehensive documentation during routine assessment. None of these are designed to structure communication with another care team member.\n\nUnderstanding this distinction — between frameworks that structure your own thinking and assessment, versus frameworks that structure communication with colleagues — is a foundational competency for safe nursing practice."
+      },
+      "Click-to-Reveal": {
+        "type": "Click-to-Reveal",
+        "recommendation": {
+          "type": "Click-to-Reveal",
+          "rationale": "Click-to-reveal cards support active recall by prompting learners to retrieve the full name and meaning of each abbreviation before it is shown, which strengthens memory encoding compared to passive reading. Five frameworks of equal weight map cleanly to five cards in a grid, making the relationship between abbreviation and meaning visually explicit once revealed. This format works especially well here because all five frameworks are known primarily by their abbreviations in clinical settings."
+        },
+        "visual_theme": "Clinical card aesthetic with Duke Navy (#012169) abbreviation labels on card fronts against a clean Hatteras (#E2E6ED) background, flipping to reveal Eno green (#339898) full-name headers on a white card back — suggesting the transition from shorthand clinical notation to full clinical understanding.",
+        "json": {
+          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 760px; margin: 0 auto; padding: 28px; background: #F3F2F1;\"><h2 style=\"color: #012169; font-size: 1.15rem; margin-bottom: 6px;\">Nursing Assessment Frameworks</h2><p style=\"color: #555; font-size: 0.88rem; margin-bottom: 20px;\">Click each card to reveal the full framework name and description.</p><div id=\"reveal-grid\" style=\"display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px;\"></div></div>",
+          "script": "var cards = [{abbr:'SBAR',full:'Situation, Background, Assessment, Recommendation',desc:'A structured communication framework for patient handoffs and urgent clinical notifications between care team members.'},{abbr:'HEAD-TO-TOE',full:'Head-to-Toe Assessment',desc:'A systematic sequential physical assessment starting at the head and progressing downward through all body systems to ensure comprehensive coverage.'},{abbr:'OLDCARTS',full:'Onset, Location, Duration, Character, Alleviating/Relieving factors, Timing, Severity',desc:'A structured symptom history framework used to fully characterize a patient complaint during the clinical interview.'},{abbr:'ABCDE',full:'Airway, Breathing, Circulation, Disability, Exposure',desc:'A rapid primary survey framework used during acute deterioration and emergencies to identify and address life threats in priority order.'},{abbr:'CIWA-Ar',full:'Clinical Institute Withdrawal Assessment for Alcohol, Revised',desc:'A validated scoring tool for monitoring and managing alcohol withdrawal symptoms, with scored items guiding medication and intervention decisions.'}]; var grid = document.getElementById('reveal-grid'); cards.forEach(function(c) { var card = document.createElement('div'); card.style.cssText = 'background: #E2E6ED; border-radius: 10px; min-height: 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; cursor: pointer; border: 2px solid transparent; transition: box-shadow 0.2s;'; var front = document.createElement('div'); front.style.cssText = 'text-align: center;'; front.innerHTML = '<div style=\"font-family: Courier New, monospace; font-size: 1.3rem; font-weight: bold; color: #012169; margin-bottom: 8px;\">' + c.abbr + '</div><div style=\"font-size: 0.78rem; color: #555;\">Click to reveal</div>'; var back = document.createElement('div'); back.style.cssText = 'display: none; text-align: left;'; back.innerHTML = '<div style=\"font-size: 0.78rem; font-weight: bold; color: #339898; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;\">' + c.abbr + '</div><div style=\"font-size: 0.85rem; font-weight: bold; color: #012169; margin-bottom: 8px; line-height: 1.4;\">' + c.full + '</div><div style=\"font-size: 0.82rem; color: #262626; line-height: 1.5;\">' + c.desc + '</div>'; card.appendChild(front); card.appendChild(back); var revealed = false; card.addEventListener('click', function() { if (!revealed) { revealed = true; front.style.display = 'none'; back.style.display = 'block'; card.style.background = 'white'; card.style.border = '2px solid #339898'; card.style.boxShadow = '0 2px 8px rgba(51,152,152,0.15)'; } else { revealed = false; back.style.display = 'none'; front.style.display = 'block'; card.style.background = '#E2E6ED'; card.style.border = '2px solid transparent'; card.style.boxShadow = 'none'; } }); grid.appendChild(card); });"
+        },
+        "static": "In clinical settings, nursing assessment frameworks are almost always referred to by their abbreviations. A nurse says 'I used SBAR' or 'I ran through ABCDE' — the full names are rarely spoken aloud. This creates a specific learning challenge: students must internalize both the abbreviation and the full conceptual structure it represents.\n\nClick-to-reveal cards address this directly. By showing only the abbreviation first, the format prompts learners to actively retrieve what they know before the answer is confirmed. This retrieval attempt — even when unsuccessful — strengthens the memory trace more effectively than reading a list of definitions.\n\nEach card in this set represents one framework. SBAR and ABCDE are the two most likely to be encountered early in clinical rotations, and most students will have some exposure to them. OLDCARTS and HEAD-TO-TOE are framework names that are less universally known before clinical placement. CIWA-Ar is the most specialized and is typically introduced in the context of medical-surgical or detox unit content.\n\nAfter working through all five cards, learners should be able to state the full name behind each abbreviation and identify the clinical context in which it is applied — the foundational level of framework knowledge required before applying them in simulated or real patient encounters."
+      },
+      "Image Hotspot": {
+        "type": "Image Hotspot",
+        "recommendation": {
+          "type": "Image Hotspot",
+          "rationale": "A hotspot interaction creates an active spatial mapping experience, inviting learners to connect each assessment framework to a visual anchor rather than reading a linear list. Mapping frameworks to zones of a body figure reinforces the logic of HEAD-TO-TOE and ABCDE as spatially grounded assessments while distinguishing SBAR, OLDCARTS, and CIWA-Ar as frameworks tied to communication and symptom analysis rather than anatomy. The interaction rewards curiosity-driven exploration and supports learners who process information visually."
+        },
+        "visual_theme": "Eno clinical green (#339898) for hotspot markers and active zone highlights against a clean white SVG body figure on a Hatteras (#E2E6ED) background, with Duke Navy (#012169) for tooltip headers — evoking the clean annotated diagrams found in clinical reference materials and anatomy atlases.",
+        "json": {
+          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"color: #012169; font-size: 1.15rem; margin-bottom: 6px;\">Assessment Framework Map</h2><p style=\"color: #555; font-size: 0.88rem; margin-bottom: 16px;\">Click a hotspot on the diagram to learn about each assessment framework.</p><div style=\"position: relative; display: inline-block; width: 100%; max-width: 680px;\" id=\"hotspot-container\"><svg viewBox=\"0 0 680 500\" xmlns=\"http://www.w3.org/2000/svg\" style=\"width:100%;background:#E2E6ED;border-radius:12px;display:block;\"><!-- Background --><rect width=\"680\" height=\"500\" fill=\"#E2E6ED\" rx=\"12\"/><!-- Body figure --><ellipse cx=\"340\" cy=\"80\" rx=\"38\" ry=\"44\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Neck --><rect x=\"328\" y=\"120\" width=\"24\" height=\"20\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Torso --><path d=\"M290 140 Q270 160 272 240 L272 320 Q272 330 340 330 Q408 330 408 320 L408 240 Q410 160 390 140 Z\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Left arm --><path d=\"M290 155 Q260 170 250 260 Q248 275 255 280 Q265 285 270 275 Q278 235 295 200\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Right arm --><path d=\"M390 155 Q420 170 430 260 Q432 275 425 280 Q415 285 410 275 Q402 235 385 200\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Left leg --><path d=\"M300 325 Q295 370 295 430 Q295 445 308 445 Q320 445 322 430 Q325 385 330 335\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Right leg --><path d=\"M380 325 Q385 370 385 430 Q385 445 372 445 Q360 445 358 430 Q355 385 350 335\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Labels for zones --><text x=\"510\" y=\"85\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone A: Head</text><text x=\"510\" y=\"185\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone B: Chest</text><text x=\"510\" y=\"285\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone C: Abdomen</text><text x=\"510\" y=\"340\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone D: Upper body</text><text x=\"510\" y=\"420\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone E: Lower body</text><!-- Connector lines --><line x1=\"378\" y1=\"80\" x2=\"505\" y2=\"82\" stroke=\"#339898\" stroke-width=\"1\" stroke-dasharray=\"4 3\"/><!-- Hotspot A: Head - ABCDE --><circle id=\"hs-a\" cx=\"340\" cy=\"80\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"85\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">A</text><!-- Hotspot B: Chest - SBAR --><circle id=\"hs-b\" cx=\"340\" cy=\"185\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"190\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">B</text><!-- Hotspot C: Abdomen - OLDCARTS --><circle id=\"hs-c\" cx=\"340\" cy=\"280\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"285\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">C</text><!-- Hotspot D: Upper limbs - HEAD-TO-TOE --><circle id=\"hs-d\" cx=\"255\" cy=\"230\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"255\" y=\"235\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">D</text><!-- Hotspot E: Lower limbs - CIWA-Ar --><circle id=\"hs-e\" cx=\"340\" cy=\"420\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"425\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">E</text></svg><div id=\"hs-tooltip\" style=\"display:none; position:absolute; top:10px; right:10px; width:220px; background:white; border:2px solid #339898; border-radius:8px; padding:14px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);\"><button id=\"hs-close\" style=\"position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:1rem;color:#555;line-height:1;\">x</button><div id=\"hs-title\" style=\"font-size:0.78rem;font-weight:bold;color:#339898;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;\"></div><div id=\"hs-name\" style=\"font-size:0.95rem;font-weight:bold;color:#012169;margin-bottom:8px;line-height:1.3;\"></div><div id=\"hs-body\" style=\"font-size:0.83rem;color:#262626;line-height:1.55;\"></div></div></div></div>",
+          "script": "var hotspotData = {a:{abbr:'ABCDE',name:'Airway, Breathing, Circulation, Disability, Exposure',body:'Used in acute deterioration and emergencies. Starts with the airway — the fastest threat to life — and systematically works through breathing, circulation, neurological status, and full body exposure. Applied before any other detailed assessment in an unstable patient.'},b:{abbr:'SBAR',name:'Situation, Background, Assessment, Recommendation',body:'A communication framework, not a physical assessment tool. Used when calling a physician or handing off care. Ensures critical information is conveyed in a predictable structure: what is happening, relevant history, your clinical interpretation, and what you are asking for.'},c:{abbr:'OLDCARTS',name:'Onset, Location, Duration, Character, Alleviating/Relieving factors, Timing, Severity',body:'Used to fully characterize a symptom during the patient interview. Each element captures a different dimension of the complaint. Particularly useful when a patient presents with pain, discomfort, or any symptom requiring a structured history before clinical decision-making.'},d:{abbr:'HEAD-TO-TOE',name:'Head-to-Toe Assessment',body:'A comprehensive sequential physical assessment starting at the head and progressing downward through all body systems. Used on admission and during routine shift assessments to ensure no system is overlooked. Documents baseline status and identifies changes over time.'},e:{abbr:'CIWA-Ar',name:'Clinical Institute Withdrawal Assessment for Alcohol, Revised',body:'A validated scoring tool for monitoring alcohol withdrawal. Items include tremor, sweating, anxiety, agitation, perceptual disturbances, and orientation. A total score guides decisions about medication administration. Typically repeated every 1-4 hours in at-risk patients.'}}; var tooltip = document.getElementById('hs-tooltip'); var title = document.getElementById('hs-title'); var name = document.getElementById('hs-name'); var body = document.getElementById('hs-body'); function showTip(key) { var d = hotspotData[key]; title.textContent = d.abbr; name.textContent = d.name; body.textContent = d.body; tooltip.style.display = 'block'; } ['a','b','c','d','e'].forEach(function(k) { var el = document.getElementById('hs-' + k); if (el) { el.addEventListener('click', function() { showTip(k); }); } }); document.getElementById('hs-close').addEventListener('click', function() { tooltip.style.display = 'none'; });"
+        },
+        "static": "Clinical assessment frameworks can be understood as applying to different domains of nursing practice: some map to the physical body, some to clinical communication, and some to structured symptom analysis. This visual mapping makes those distinctions tangible rather than abstract.\n\nABCDE is the most spatially immediate framework — it literally moves through physiological systems in the order most critical to survival, beginning with airway and ending with full-body exposure. HEAD-TO-TOE is similarly body-anchored, progressing from neurological assessment at the head through every system to the extremities. Both frameworks have an inherent spatial logic that a body diagram can reinforce.\n\nSBAR and OLDCARTS have no direct anatomical anchor — SBAR structures communication between clinicians, and OLDCARTS structures the nurse's conversation with the patient about a symptom. Mapping them to a body figure makes the point that they are applied in the context of a patient encounter but are not themselves physical assessment sequences.\n\nCIWA-Ar occupies a middle ground: it involves observing physical signs (tremor, diaphoresis, agitation) and asking the patient questions, but its output is a numerical score rather than a body-system documentation. Treating it as a distinct category in a visual framework helps learners understand that validated scoring tools are a different kind of clinical instrument from open-ended assessment frameworks."
+      },
+      "Branching Scenario": {
+        "type": "Branching Scenario",
+        "recommendation": {
+          "type": "Branching Scenario",
+          "rationale": "A branching scenario places learners in the role of a practicing nurse and asks them to make decisions under simulated pressure, which develops the contextual judgment that factual knowledge alone cannot build. The scenario tests not just knowledge of SBAR but the ability to recognize when a structured communication framework is needed and to select the right one over plausible alternatives. Branching consequences make the stakes of each decision concrete, reinforcing correct reasoning and clarifying the cost of errors."
+        },
+        "visual_theme": "Clinical decision environment using Duke Copper (#C84E00) as the accent color for decision-point prompts and choice buttons to signal active judgment moments, Eno green (#339898) for positive outcome screens confirming correct paths, and Duke Navy (#012169) for scenario narrative text — creating a tonal shift between story, decision, and resolution.",
+        "json": {
+          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><div id=\"branch-container\"></div></div>",
+          "script": "var scenes = {start:{type:'scene',title:'Incoming Page',text:'You are the night-shift nurse on a medical-surgical floor. At 2:14 AM, you receive a page: your patient in room 412, Mr. Okafor, has become acutely confused. He is 68 years old, admitted two days ago for a hip replacement. When you arrive at the bedside, he is agitated, pulling at his IV line, and does not know where he is. His vitals: HR 108, BP 144/90, SpO2 94% on room air, RR 22.',decision:'You need to act. What do you do first?',choices:[{label:'Run through ABCDE to quickly assess for an acute physiological threat before anything else.',next:'abcde_correct'},{label:'Call the physician immediately and describe what you are seeing.',next:'call_first_wrong'}]},abcde_correct:{type:'scene',title:'Primary Survey',text:'You run through ABCDE. Airway: patent, speaking in full sentences though confused. Breathing: RR 22, SpO2 94%, mild use of accessory muscles. Circulation: HR 108, BP 144/90, peripherally warm. Disability: confused and agitated, AVPU = V (responds to voice). Exposure: no signs of bleeding, no rash, surgical wound clean and intact. You apply supplemental oxygen and his SpO2 rises to 97%. The acute life threats are addressed. Now you need to escalate.',decision:'How do you communicate this to the on-call physician?',choices:[{label:'Use SBAR to structure your call — Situation, Background, Assessment, Recommendation.',next:'sbar_correct'},{label:'Describe the scene as you observed it, starting with what woke you up and working through what you found.',next:'unstructured_wrong'}]},call_first_wrong:{type:'outcome',positive:false,title:'Missed Step',text:'You call the physician before completing your own assessment. The physician asks: Is his airway clear? What is his oxygen saturation? You do not have the answers. The physician asks you to call back when you have completed your assessment. Returning to the bedside costs time, and you realize you should have completed your primary survey first. ABCDE gives you the information you need before you escalate.',choices:[{label:'Start over',next:'start'}]},sbar_correct:{type:'outcome',positive:true,title:'Effective Escalation',text:'You call the on-call physician using SBAR. Situation: Mr. Okafor in 412 has new acute confusion and agitation since approximately 2 AM. Background: post-op day 2 from right hip replacement, no prior cognitive history, was oriented at 10 PM check. Assessment: vitals show tachycardia and mild hypoxia now corrected with O2, confusion may represent post-op delirium, pain crisis, or early infection. Recommendation: requesting orders to assess further and consider pain management review. The physician thanks you for the clear handoff and provides orders within two minutes. Mr. Okafor is assessed, his pain is managed, and he settles by 3 AM.',choices:[{label:'Restart scenario',next:'start'}]},unstructured_wrong:{type:'outcome',positive:false,title:'Communication Breakdown',text:'You describe the scene as you experienced it — the page, walking into the room, the agitation, the vitals in the order you took them. The physician interrupts twice for clarification. It takes four minutes to convey what could have been communicated in under ninety seconds. The physician is frustrated and asks for a cleaner summary. SBAR exists precisely to avoid this: it gives both the nurse and the physician a shared expectation of what information will come in what order.',choices:[{label:'Try again',next:'start'}]}}; var container = document.getElementById('branch-container'); function render(key) { container.innerHTML = ''; var scene = scenes[key]; var isPositive = scene.positive === true; var isNegative = scene.positive === false; var headerColor = scene.type === 'outcome' ? (isPositive ? '#339898' : '#C84E00') : '#012169'; var bgColor = scene.type === 'outcome' ? (isPositive ? '#E8F5F5' : '#FDF0EA') : 'white'; var card = document.createElement('div'); card.style.cssText = 'background:' + bgColor + ';border-radius:10px;padding:24px;box-shadow:0 1px 5px rgba(0,0,0,0.1);'; var badge = document.createElement('div'); badge.style.cssText = 'font-size:0.75rem;font-weight:bold;text-transform:uppercase;letter-spacing:0.09em;color:' + headerColor + ';margin-bottom:8px;'; badge.textContent = scene.type === 'scene' ? 'Decision Point' : (isPositive ? 'Positive Outcome' : 'Learning Moment'); card.appendChild(badge); var h = document.createElement('h2'); h.style.cssText = 'color:#012169;font-size:1.05rem;margin:0 0 14px;'; h.textContent = scene.title; card.appendChild(h); var p = document.createElement('p'); p.style.cssText = 'color:#262626;font-size:0.9rem;line-height:1.65;margin:0 0 18px;'; p.textContent = scene.text; card.appendChild(p); if (scene.decision) { var q = document.createElement('p'); q.style.cssText = 'color:#C84E00;font-size:0.88rem;font-weight:bold;margin:0 0 12px;'; q.textContent = scene.decision; card.appendChild(q); } scene.choices.forEach(function(ch) { var btn = document.createElement('button'); btn.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:10px;padding:12px 16px;border:2px solid #C84E00;border-radius:8px;background:white;cursor:pointer;font-size:0.87rem;color:#262626;line-height:1.5;'; if (scene.type === 'outcome') { btn.style.borderColor = isPositive ? '#339898' : '#C84E00'; btn.style.color = isPositive ? '#1a6060' : '#7a2e00'; btn.style.fontWeight = 'bold'; btn.style.fontSize = '0.85rem'; } btn.textContent = ch.label; btn.addEventListener('mouseover', function() { btn.style.background = '#F5F5F5'; }); btn.addEventListener('mouseout', function() { btn.style.background = 'white'; }); btn.addEventListener('click', function() { render(ch.next); }); card.appendChild(btn); }); container.appendChild(card); } render('start');"
+        },
+        "static": "This branching scenario places the learner in a night-shift nursing situation and tests two sequential decisions: whether to complete a primary survey before escalating, and whether to use SBAR when making the escalation call. The scenario is designed so that each wrong path produces a realistic consequence — not a generic 'incorrect' message, but an outcome that reflects how the error would actually play out at the bedside.\n\nThe first decision point tests whether learners recognize that ABCDE belongs before the phone call. Calling a physician without completing your own assessment leaves you unable to answer their questions and results in a second call. This mirrors a common pattern in clinical settings where inexperienced nurses escalate before they have gathered the information needed to support that escalation.\n\nThe second decision point tests whether learners can select SBAR over an unstructured verbal account. Both paths involve communicating with the physician, but only SBAR gives the physician information in the structured format they expect. Unstructured communication leads to interruptions, frustration, and delayed orders — all realistic consequences with direct patient safety implications.\n\nThe positive outcome path reinforces the full reasoning chain: ABCDE first to identify and address acute threats, then SBAR to communicate findings and receive orders efficiently. Together, these two frameworks represent the acute assessment and communication sequence that nursing students will use throughout their clinical careers."
+      }
     };
 
-    // ── ACCENT COLOR DETECTION ───────────────────────────────────────────────
     function detectAccentColor(themeText) {
       const t = themeText.toLowerCase();
       if (t.includes('#339898') || t.includes('eno')) return '#339898';
@@ -721,14 +797,19 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       if (t.includes('#a1b70d') || t.includes('piedmont')) return '#A1B70D';
       if (t.includes('#0577b1') || t.includes('shale')) return '#0577B1';
       if (t.includes('#00539b') || t.includes('royal')) return '#00539B';
-      return '#E89923'; // default persimmon
+      return '#E89923';
     }
 
-    // ── API CALL ─────────────────────────────────────────────────────────────
-    async function callClaude(userInput) {
+    async function callClaude(userInput, forcedType) {
       if (USE_MOCK_API) {
-        await new Promise(r => setTimeout(r, 1800));
-        return MOCK_RESPONSE;
+        await new Promise(r => setTimeout(r, 800));
+        if (forcedType && MOCK_RESPONSES[forcedType]) return MOCK_RESPONSES[forcedType];
+        return MOCK_RESPONSES['Accordion'];
+      }
+
+      let messageContent = userInput;
+      if (forcedType) {
+        messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
       }
 
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -743,7 +824,7 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
           model: 'claude-sonnet-4-6',
           max_tokens: 8192,
           system: SYSTEM_PROMPT,
-          messages: [{ role: 'user', content: userInput }]
+          messages: [{ role: 'user', content: messageContent }]
         })
       });
 
@@ -753,34 +834,37 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       }
 
       const data = await response.json();
-      const text = data.content[0].text;
-      return JSON.parse(text);
+      return JSON.parse(data.content[0].text);
     }
 
-    // ── DOM REFS ─────────────────────────────────────────────────────────────
-    const steps = {
-      1: document.getElementById('step-1'),
-      2: document.getElementById('step-2'),
-      3: document.getElementById('step-3')
-    };
-    const stepLabel    = document.getElementById('step-label');
-    const textarea     = document.getElementById('challenge-input');
-    const charCount    = document.getElementById('char-count-hint');
-    const analyzeBtn   = document.getElementById('analyze-btn');
-    const errorBox     = document.getElementById('error-box');
-    const backLink     = document.getElementById('back-link');
+    let currentInput = '';
+    let currentResult = null;
+    let confirmedResult = null;
 
-    // results
-    const resultType     = document.getElementById('result-type');
-    const resultRationale = document.getElementById('result-rationale');
-    const resultTheme    = document.getElementById('result-theme');
-    const resultSwatch   = document.getElementById('result-swatch');
+    const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3') };
+    const stepLabel = document.getElementById('step-label');
+    const textarea = document.getElementById('challenge-input');
+    const charCount = document.getElementById('char-count-hint');
+    const analyzeBtn = document.getElementById('analyze-btn');
+    const errorBox = document.getElementById('error-box');
+    const step2El = document.getElementById('step-2');
+    const s2RecommendBadge = document.getElementById('s2-recommendation-badge');
+    const s2RationaleText = document.getElementById('s2-rationale-text');
+    const previewIframe = document.getElementById('preview-iframe');
+    const previewShimmer = document.getElementById('preview-shimmer');
+    const s2TypeButtons = document.querySelectorAll('.type-pill');
+    const s2Regenerating = document.getElementById('s2-regenerating');
+    const s2ConfirmBtn = document.getElementById('s2-confirm-btn');
+    const s2StartOver = document.getElementById('s2-start-over');
+    const backToPreviewLink = document.getElementById('back-to-preview-link');
+    const s3TypeBadge = document.getElementById('s3-type-badge');
+    const resultTheme = document.getElementById('result-theme');
+    const resultSwatch = document.getElementById('result-swatch');
     const resultHtmlCode = document.getElementById('result-html-code');
     const resultScriptCode = document.getElementById('result-script-code');
-    const resultStatic   = document.getElementById('result-static');
+    const resultStatic = document.getElementById('result-static');
     const resultStaticText = document.getElementById('result-static-text');
 
-    // ── STEP NAVIGATION ──────────────────────────────────────────────────────
     function showStep(n) {
       Object.values(steps).forEach(s => s.classList.remove('active'));
       steps[n].classList.add('active');
@@ -788,10 +872,43 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // ── CHAR COUNT ───────────────────────────────────────────────────────────
+    function setStep2Substate(state) {
+      step2El.classList.remove('step-2--loading', 'step-2--preview');
+      step2El.classList.add('step-2--' + state);
+    }
+
+    function buildSrcdoc(html, script) {
+      return `<!DOCTYPE html><html><head><meta charset="UTF-8"><style>body{margin:0;padding:0;}</style></head><body>${html}<script>${script}<\/script></body></html>`;
+    }
+
+    function setPreviewIframe(result) {
+      previewShimmer.classList.add('visible');
+      previewIframe.style.minHeight = '320px';
+      previewIframe.srcdoc = buildSrcdoc(result.json.html, result.json.script);
+      previewIframe.onload = () => {
+        try {
+          const bodyHeight = previewIframe.contentDocument.body.scrollHeight;
+          if (bodyHeight > 0) {
+            previewIframe.style.height = (bodyHeight + 32) + 'px';
+            previewIframe.style.minHeight = '';
+          }
+        } catch(e) {}
+        previewShimmer.classList.remove('visible');
+      };
+    }
+
+    function updatePreview(result) {
+      currentResult = result;
+      const typeName = result.recommendation ? result.recommendation.type : result.type;
+      const rationale = result.recommendation ? result.recommendation.rationale : '';
+      s2RecommendBadge.textContent = 'Recommended: ' + typeName;
+      s2RationaleText.textContent = rationale;
+      s2TypeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.type === typeName));
+      setPreviewIframe(result);
+    }
+
     textarea.addEventListener('input', () => {
       const len = textarea.value.length;
-      const remaining = 4000 - len;
       const meetsMin = len >= 50;
       charCount.textContent = `${len} / 4000${meetsMin ? '' : ' — 50 characters minimum to analyze'}`;
       charCount.classList.toggle('warn', !meetsMin && len > 0);
@@ -800,18 +917,17 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       errorBox.style.display = 'none';
     });
 
-    // ── ANALYZE ──────────────────────────────────────────────────────────────
     analyzeBtn.addEventListener('click', async () => {
       const input = textarea.value.trim();
       if (input.length < 50) return;
-
+      currentInput = input;
       errorBox.style.display = 'none';
+      setStep2Substate('loading');
       showStep(2);
-
       try {
         const result = await callClaude(input);
-        populateResults(result);
-        showStep(3);
+        updatePreview(result);
+        setStep2Substate('preview');
       } catch (err) {
         showStep(1);
         errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
@@ -819,42 +935,63 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       }
     });
 
-    // ── POPULATE RESULTS ─────────────────────────────────────────────────────
-    function populateResults(data) {
-      // Card 1
-      resultType.textContent = data.recommendation.type;
-      resultRationale.textContent = data.recommendation.rationale;
+    s2TypeButtons.forEach(btn => {
+      btn.addEventListener('click', async () => {
+        const type = btn.dataset.type;
+        const currentTypeName = currentResult && currentResult.recommendation ? currentResult.recommendation.type : (currentResult ? currentResult.type : '');
+        if (type === currentTypeName) return;
+        s2TypeButtons.forEach(b => b.disabled = true);
+        s2Regenerating.classList.add('visible');
+        try {
+          const result = await callClaude(currentInput, type);
+          updatePreview(result);
+        } catch (err) {}
+        finally {
+          s2TypeButtons.forEach(b => b.disabled = false);
+          s2Regenerating.classList.remove('visible');
+        }
+      });
+    });
 
-      // Card 2
+    s2ConfirmBtn.addEventListener('click', () => {
+      confirmedResult = currentResult;
+      populateStep3(confirmedResult);
+      showStep(3);
+    });
+
+    s2StartOver.addEventListener('click', (e) => {
+      e.preventDefault();
+      showStep(1);
+      textarea.focus();
+    });
+
+    backToPreviewLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showStep(2);
+    });
+
+    function populateStep3(data) {
+      const typeName = data.recommendation ? data.recommendation.type : data.type;
+      s3TypeBadge.textContent = typeName;
       resultTheme.textContent = data.visual_theme;
       const accent = detectAccentColor(data.visual_theme);
       resultSwatch.style.background = accent;
       resultSwatch.setAttribute('title', `Accent color: ${accent}`);
-
-      // Card 3
       resultHtmlCode.textContent = data.json.html;
       resultScriptCode.textContent = data.json.script;
-
-      // Card 4
       resultStatic.textContent = data.static;
       resultStaticText.textContent = data.static;
     }
 
-    // ── COPY BUTTONS ─────────────────────────────────────────────────────────
-    function setupCopy(btn, getTextFn, label) {
+    function setupCopy(btn, getTextFn) {
       btn.addEventListener('click', async () => {
         try {
-          const text = getTextFn();
-          await navigator.clipboard.writeText(text);
+          await navigator.clipboard.writeText(getTextFn());
           const origHTML = btn.innerHTML;
           btn.textContent = 'Copied!';
           btn.classList.add('copied');
-          setTimeout(() => {
-            btn.innerHTML = origHTML;
-            btn.classList.remove('copied');
-          }, 1500);
+          setTimeout(() => { btn.innerHTML = origHTML; btn.classList.remove('copied'); }, 1500);
         } catch {
-          // fallback for non-secure contexts
           const ta = document.createElement('textarea');
           ta.value = getTextFn();
           ta.style.position = 'fixed';
@@ -866,39 +1003,17 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
           const origHTML = btn.innerHTML;
           btn.textContent = 'Copied!';
           btn.classList.add('copied');
-          setTimeout(() => {
-            btn.innerHTML = origHTML;
-            btn.classList.remove('copied');
-          }, 1500);
+          setTimeout(() => { btn.innerHTML = origHTML; btn.classList.remove('copied'); }, 1500);
         }
       });
     }
 
-    setupCopy(
-      document.getElementById('copy-html-btn'),
-      () => resultHtmlCode.textContent
-    );
-    setupCopy(
-      document.getElementById('copy-script-btn'),
-      () => resultScriptCode.textContent
-    );
-    setupCopy(
-      document.getElementById('copy-static-btn'),
-      () => resultStaticText.textContent
-    );
+    setupCopy(document.getElementById('copy-html-btn'), () => resultHtmlCode.textContent);
+    setupCopy(document.getElementById('copy-script-btn'), () => resultScriptCode.textContent);
+    setupCopy(document.getElementById('copy-static-btn'), () => resultStaticText.textContent);
 
-    // ── BACK LINK ────────────────────────────────────────────────────────────
-    backLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      showStep(1);
-      textarea.focus();
-    });
-
-    // ── KEYBOARD: submit on Ctrl/Cmd+Enter ───────────────────────────────────
     textarea.addEventListener('keydown', (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !analyzeBtn.disabled) {
-        analyzeBtn.click();
-      }
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !analyzeBtn.disabled) analyzeBtn.click();
     });
   </script>
 
