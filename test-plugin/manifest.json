@@ -1,0 +1,28 @@
+{
+  "name": "Test Plugin",
+  "version": "1.0",
+  "description": "Custom accordion for term spotlights and key concepts",
+  "actionTypes": [],
+  "configurationExamples": [
+    {
+      "name": "Default",
+      "configuration": {
+        "title": "Key Terms: Artificial Intelligence",
+        "items": [
+          {
+            "header": "Machine Learning",
+            "body": "A type of AI where systems learn from data to improve their performance over time — without being explicitly programmed for each task."
+          },
+          {
+            "header": "Large Language Model (LLM)",
+            "body": "An AI system trained on large amounts of text data that can generate, summarize, translate, and reason about language."
+          },
+          {
+            "header": "Hallucination",
+            "body": "When an AI model generates information that sounds confident and plausible but is factually incorrect or made up."
+          }
+        ]
+      }
+    }
+  ]
+}

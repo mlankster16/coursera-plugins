@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://www.coursera.org/widget/coursera-widget-connect-v0.js"></script>
+</head>
+<body>
+  <div id="content">
+    <p style="color:#999;font-size:14px;">Loading...</p>
+  </div>
+
+  <script>
+    courseraApi.callMethod({
+      type: 'GET_SESSION_CONFIGURATION',
+      onSuccess: function(config) {
+        var container = document.getElementById('content');
+
+        if (config && config.html) {
+          container.innerHTML = config.html;
+        }
+
+        if (config && config.script) {
+          var script = document.createElement('script');
+          script.textContent = config.script;
+          document.body.appendChild(script);
+        }
+      },
+      onFailure: function(err) {
+        document.getElementById('content').innerHTML = '<p>Error loading content.</p>';
+      }
+    });
+  </script>
+</body>
+</html>
