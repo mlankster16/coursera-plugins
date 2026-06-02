@@ -1,0 +1,3 @@
+[build]
+  publish = "workflow-tool"
+  functions = "workflow-tool/netlify/functions"
