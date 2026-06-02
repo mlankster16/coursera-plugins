@@ -395,7 +395,8 @@
     }
 
     .card { background: var(--white); border: 0.5px solid var(--hatteras); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
-    .card-title { font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--graphite); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 14px; }
+    .card-title { font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--graphite); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
+    .card-hint { font-size: 0.82rem; color: var(--graphite); margin-bottom: 14px; line-height: 1.5; }
 
     .theme-row { display: flex; align-items: flex-start; gap: 14px; }
     .color-swatch { width: 36px; height: 36px; border-radius: 6px; border: 0.5px solid var(--hatteras); flex-shrink: 0; }
@@ -455,7 +456,7 @@
         </div>
         <div class="wordmark-text">
           <span class="wordmark-duke">Duke</span>
-          <span class="wordmark-li">Learning Innovation</span>
+          <span class="wordmark-li">LX Design Team</span>
         </div>
       </a>
       <span class="step-indicator" id="step-label" aria-live="polite">Step 1 of 3</span>
@@ -466,7 +467,7 @@
 
     <!-- STEP 1 -->
     <section class="step active" id="step-1" aria-labelledby="s1-heading">
-      <h1 class="step1-heading" id="s1-heading">LX Interaction Design<br>Workflow Tool</h1>
+      <h1 class="step1-heading" id="s1-heading">Coursera Interaction Design<br>Workflow Tool</h1>
       <p class="step1-sub">
         Describe your learning design challenge and this tool will identify the best interaction type for your content, generate a ready-to-use Coursera plugin JSON configuration, and provide an accessible static companion text.
       </p>
@@ -556,26 +557,14 @@
 
       <div class="card" id="card-json">
         <p class="card-title">Plugin JSON Configuration</p>
-
+        <p class="card-hint">Paste this entire object into Coursera's plugin configuration editor.</p>
         <div class="code-section">
-          <p class="code-label">HTML</p>
           <div class="code-block">
-            <pre id="result-html-code">—</pre>
+            <pre id="result-json-code">—</pre>
           </div>
-          <button class="btn-copy" id="copy-html-btn">
+          <button class="btn-copy" id="copy-json-btn">
             <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Copy HTML
-          </button>
-        </div>
-
-        <div class="code-section">
-          <p class="code-label">Script</p>
-          <div class="code-block">
-            <pre id="result-script-code">—</pre>
-          </div>
-          <button class="btn-copy" id="copy-script-btn">
-            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
-            Copy Script
+            Copy JSON
           </button>
         </div>
       </div>
@@ -587,7 +576,6 @@
           <svg width="13" height="13" viewBox="0 0 13 13" fill="none" aria-hidden="true"><rect x="1" y="4" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M4 4V2.5A1.5 1.5 0 015.5 1H10.5A1.5 1.5 0 0112 2.5V7.5A1.5 1.5 0 0110.5 9H9" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
           Copy Text
         </button>
-        <span id="result-static-text" style="display:none;"></span>
       </div>
     </section>
 
@@ -860,10 +848,8 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
     const s3TypeBadge = document.getElementById('s3-type-badge');
     const resultTheme = document.getElementById('result-theme');
     const resultSwatch = document.getElementById('result-swatch');
-    const resultHtmlCode = document.getElementById('result-html-code');
-    const resultScriptCode = document.getElementById('result-script-code');
+    const resultJsonCode = document.getElementById('result-json-code');
     const resultStatic = document.getElementById('result-static');
-    const resultStaticText = document.getElementById('result-static-text');
 
     function showStep(n) {
       Object.values(steps).forEach(s => s.classList.remove('active'));
@@ -977,10 +963,11 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       const accent = detectAccentColor(data.visual_theme);
       resultSwatch.style.background = accent;
       resultSwatch.setAttribute('title', `Accent color: ${accent}`);
-      resultHtmlCode.textContent = data.json.html;
-      resultScriptCode.textContent = data.json.script;
+      // Build the two-field JSON object Coursera expects and display it as a
+      // formatted string. JSON.stringify handles all escaping automatically.
+      const pluginJson = JSON.stringify({ html: data.json.html, script: data.json.script }, null, 2);
+      resultJsonCode.textContent = pluginJson;
       resultStatic.textContent = data.static;
-      resultStaticText.textContent = data.static;
     }
 
     function setupCopy(btn, getTextFn) {
@@ -1008,9 +995,8 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
       });
     }
 
-    setupCopy(document.getElementById('copy-html-btn'), () => resultHtmlCode.textContent);
-    setupCopy(document.getElementById('copy-script-btn'), () => resultScriptCode.textContent);
-    setupCopy(document.getElementById('copy-static-btn'), () => resultStaticText.textContent);
+    setupCopy(document.getElementById('copy-json-btn'), () => resultJsonCode.textContent);
+    setupCopy(document.getElementById('copy-static-btn'), () => resultStatic.textContent);
 
     textarea.addEventListener('keydown', (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !analyzeBtn.disabled) analyzeBtn.click();
