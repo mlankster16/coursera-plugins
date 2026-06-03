@@ -837,18 +837,27 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
       }
 
+      // ── MODEL CONFIG — change here to swap speed vs quality ─────────────────
+      // 'claude-sonnet-4-6'  → best quality, ~10-15s first call, ~5-8s cached
+      // 'claude-haiku-4-5'   → faster, ~3-5s, slightly lighter output
+      const MODEL = 'claude-sonnet-4-6';
+
       const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
           'x-api-key': apiKey,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
           'content-type': 'application/json',
           'anthropic-dangerous-direct-browser-access': 'true'
         },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-6',
+          model: MODEL,
           max_tokens: 8192,
-          system: SYSTEM_PROMPT,
+          // Prompt caching: the system prompt is long and identical on every
+          // request — marking it ephemeral tells Anthropic to cache it for
+          // ~5 minutes. Subsequent calls skip re-processing it entirely.
+          system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
           messages: [{ role: 'user', content: messageContent }]
         })
       });
