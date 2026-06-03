@@ -398,6 +398,10 @@
     .card { background: var(--white); border: 0.5px solid var(--hatteras); border-radius: 12px; padding: 24px 28px; margin-bottom: 16px; }
     .card-title { font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--graphite); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 8px; }
     .card-hint { font-size: 0.82rem; color: var(--graphite); margin-bottom: 14px; line-height: 1.5; }
+    .edit-textarea { width: 100%; min-height: 180px; padding: 14px; font-family: 'Roboto Mono', 'Courier New', monospace; font-size: 0.8rem; color: var(--code-fg); background: var(--code-bg); border: 0.5px solid #444; border-radius: 8px; resize: vertical; line-height: 1.6; outline: none; }
+    .edit-textarea:focus { border-color: var(--royal); }
+    .edit-textarea--prose { font-family: 'Open Sans', Arial, sans-serif; font-size: 0.9rem; color: var(--cast-iron); background: var(--white); border-color: var(--hatteras); min-height: 140px; }
+    .edit-textarea--prose:focus { border-color: var(--royal); }
 
     .theme-row { display: flex; align-items: flex-start; gap: 14px; }
     .color-swatch { width: 36px; height: 36px; border-radius: 6px; border: 0.5px solid var(--hatteras); flex-shrink: 0; }
@@ -461,7 +465,7 @@
         </div>
       </a>
       <div style="display:flex;align-items:center;gap:12px;">
-        <span class="step-indicator" id="step-label" aria-live="polite">Step 1 of 3</span>
+        <span class="step-indicator" id="step-label" aria-live="polite">Step 1 of 4</span>
         <button id="key-btn" aria-label="API key settings" title="API key settings" style="background:none;border:none;cursor:pointer;padding:4px;display:flex;align-items:center;opacity:0.6;transition:opacity 0.15s;" >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M11 1a4 4 0 0 1 0 8 4 4 0 0 1-3.87-3H1.5a.5.5 0 0 0 0 1H3v1.5a.5.5 0 0 0 1 0V7h1.13A4 4 0 0 1 11 1zm0 1.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5z" fill="white"/></svg>
         </button>
@@ -557,14 +561,45 @@
 
     </section>
 
-    <!-- STEP 3 -->
+    <!-- STEP 3: EDIT -->
     <section class="step" id="step-3" aria-labelledby="s3-heading">
       <a href="#" class="back-link" id="back-to-preview-link">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Back to preview
       </a>
 
-      <h2 class="results-heading" id="s3-heading">Your Plugin Configuration</h2>
+      <h2 class="results-heading" id="s3-heading">Refine Your Interaction</h2>
+      <p class="step1-sub" style="margin-bottom:28px;">Review and edit the generated content below before producing the final output. Changes here are reflected in the JSON on the next step.</p>
+
+      <div class="card">
+        <p class="card-title">HTML &amp; CSS</p>
+        <p class="card-hint">The markup and styles for your interaction. Edit any text, labels, or structure here.</p>
+        <textarea id="edit-html" class="edit-textarea" spellcheck="false" aria-label="HTML and CSS content"></textarea>
+      </div>
+
+      <div class="card">
+        <p class="card-title">JavaScript</p>
+        <p class="card-hint">The behaviour code for your interaction. Must use addEventListener — no inline onclick handlers.</p>
+        <textarea id="edit-script" class="edit-textarea" spellcheck="false" aria-label="JavaScript content"></textarea>
+      </div>
+
+      <div class="card">
+        <p class="card-title">Static Companion Text</p>
+        <p class="card-hint">Plain-prose version of the interaction for accessibility and screen readers. Edit freely.</p>
+        <textarea id="edit-static" class="edit-textarea edit-textarea--prose" spellcheck="true" aria-label="Static companion text"></textarea>
+      </div>
+
+      <button class="s2-confirm-btn" id="s3-generate-btn">Generate output &#8594;</button>
+    </section>
+
+    <!-- STEP 4: OUTPUT -->
+    <section class="step" id="step-4" aria-labelledby="s4-heading">
+      <a href="#" class="back-link" id="back-to-edit-link">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Back to edit
+      </a>
+
+      <h2 class="results-heading" id="s4-heading">Your Plugin Configuration</h2>
       <div class="s3-badge" id="s3-type-badge">—</div>
 
       <div class="card" id="card-theme">
@@ -905,7 +940,7 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     let confirmedResult = null;
     const typeCache = {};   // stores results keyed by type name for this session
 
-    const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3') };
+    const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3'), 4: document.getElementById('step-4') };
     const stepLabel = document.getElementById('step-label');
     const textarea = document.getElementById('challenge-input');
     const charCount = document.getElementById('char-count-hint');
@@ -921,7 +956,12 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     const s2ConfirmBtn = document.getElementById('s2-confirm-btn');
     const s2StartOver = document.getElementById('s2-start-over');
     const backToPreviewLink = document.getElementById('back-to-preview-link');
-    const s3TypeBadge = document.getElementById('s3-type-badge');
+    const s3GenerateBtn    = document.getElementById('s3-generate-btn');
+    const backToEditLink   = document.getElementById('back-to-edit-link');
+    const editHtml         = document.getElementById('edit-html');
+    const editScript       = document.getElementById('edit-script');
+    const editStatic       = document.getElementById('edit-static');
+    const s3TypeBadge      = document.getElementById('s3-type-badge');
     const resultTheme = document.getElementById('result-theme');
     const resultSwatch = document.getElementById('result-swatch');
     const resultJsonCode = document.getElementById('result-json-code');
@@ -930,8 +970,18 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     function showStep(n) {
       Object.values(steps).forEach(s => s.classList.remove('active'));
       steps[n].classList.add('active');
-      stepLabel.textContent = `Step ${n} of 3`;
+      stepLabel.textContent = `Step ${n} of 4`;
       window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Normalise a type name from Claude's response to match the button data-type
+    // values (case-insensitive). Falls back to the raw value if no match found.
+    function normalizeType(typeName) {
+      if (!typeName) return typeName;
+      const match = Array.from(s2TypeButtons).find(
+        btn => btn.dataset.type.toLowerCase() === typeName.toLowerCase()
+      );
+      return match ? match.dataset.type : typeName;
     }
 
     function setStep2Substate(state) {
@@ -961,10 +1011,11 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
 
     function updatePreview(result) {
       currentResult = result;
-      const typeName = result.recommendation ? result.recommendation.type : result.type;
+      const rawType = result.recommendation ? result.recommendation.type : result.type;
+      const typeName = normalizeType(rawType);
       const rationale = result.recommendation ? result.recommendation.rationale : '';
 
-      // Store in session cache so revisiting this type is instant
+      // Store in session cache keyed by normalised type name
       typeCache[typeName] = result;
 
       s2RecommendBadge.textContent = 'Recommended: ' + typeName;
@@ -1035,7 +1086,10 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
 
     s2ConfirmBtn.addEventListener('click', () => {
       confirmedResult = currentResult;
-      populateStep3(confirmedResult);
+      // Populate the edit textareas with the generated content
+      editHtml.value   = confirmedResult.json.html;
+      editScript.value = confirmedResult.json.script;
+      editStatic.value = confirmedResult.static;
       showStep(3);
     });
 
@@ -1050,7 +1104,24 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       showStep(2);
     });
 
-    function populateStep3(data) {
+    s3GenerateBtn.addEventListener('click', () => {
+      // Build Step 4 from whatever is currently in the edit textareas
+      const data = {
+        recommendation: confirmedResult.recommendation,
+        visual_theme:   confirmedResult.visual_theme,
+        json: { html: editHtml.value, script: editScript.value },
+        static: editStatic.value
+      };
+      populateStep4(data);
+      showStep(4);
+    });
+
+    backToEditLink.addEventListener('click', (e) => {
+      e.preventDefault();
+      showStep(3);
+    });
+
+    function populateStep4(data) {
       const typeName = data.recommendation ? data.recommendation.type : data.type;
       s3TypeBadge.textContent = typeName;
       resultTheme.textContent = data.visual_theme;
