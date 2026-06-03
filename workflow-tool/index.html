@@ -329,6 +329,7 @@
     .type-pill:hover:not(.active):not(:disabled) { border-color: var(--royal); color: var(--royal); }
     .type-pill.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .type-pill:disabled { opacity: 0.5; cursor: not-allowed; }
+    .type-pill.cached::after { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--royal); border-radius: 50%; margin-left: 6px; vertical-align: middle; }
     .type-pill:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
 
     .s2-regenerating { font-size: 0.78rem; color: var(--graphite); font-style: italic; display: none; margin-top: 6px; }
@@ -902,6 +903,7 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     let currentInput = '';
     let currentResult = null;
     let confirmedResult = null;
+    const typeCache = {};   // stores results keyed by type name for this session
 
     const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3') };
     const stepLabel = document.getElementById('step-label');
@@ -961,9 +963,19 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       currentResult = result;
       const typeName = result.recommendation ? result.recommendation.type : result.type;
       const rationale = result.recommendation ? result.recommendation.rationale : '';
+
+      // Store in session cache so revisiting this type is instant
+      typeCache[typeName] = result;
+
       s2RecommendBadge.textContent = 'Recommended: ' + typeName;
       s2RationaleText.textContent = rationale;
-      s2TypeButtons.forEach(btn => btn.classList.toggle('active', btn.dataset.type === typeName));
+
+      // Mark active button; add a small dot to any button that has a cached result
+      s2TypeButtons.forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === typeName);
+        btn.classList.toggle('cached', !!(typeCache[btn.dataset.type]) && btn.dataset.type !== typeName);
+      });
+
       setPreviewIframe(result);
     }
 
@@ -1000,6 +1012,14 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         const type = btn.dataset.type;
         const currentTypeName = currentResult && currentResult.recommendation ? currentResult.recommendation.type : (currentResult ? currentResult.type : '');
         if (type === currentTypeName) return;
+
+        // If we already generated this type, show it instantly from cache
+        if (typeCache[type]) {
+          updatePreview(typeCache[type]);
+          return;
+        }
+
+        // Otherwise call the API
         s2TypeButtons.forEach(b => b.disabled = true);
         s2Regenerating.classList.add('visible');
         try {
