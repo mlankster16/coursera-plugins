@@ -717,6 +717,13 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
 }
 
 Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no \`\`\`json, no \`\`\` — just the object itself starting with { and ending with }.
+
+CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without modification:
+- Every double quote inside a string value must be escaped as \"
+- Every backslash inside a string value must be escaped as \\
+- Newlines inside string values must be written as \\n, not as actual line breaks
+- The html and script field values must be single-line JSON strings with all special characters escaped
+- Do not use actual newlines or tab characters inside the "html" or "script" string values
 `;
 
     const MOCK_RESPONSES = {
@@ -858,7 +865,29 @@ Do not wrap your response in markdown code fences or backticks. Return only the 
         .replace(/^```\n?/, '')
         .replace(/\n?```$/, '')
         .trim();
-      return JSON.parse(cleaned);
+
+      // First attempt — direct parse
+      try {
+        return JSON.parse(cleaned);
+      } catch (parseErr) {
+        // Second attempt — repair common Claude JSON issues:
+        // actual newlines/tabs inside string values break JSON.parse
+        const repaired = cleaned
+          .replace(/:\s*"([\s\S]*?)"\s*([,}])/g, (match, val, trail) => {
+            const fixed = val
+              .replace(/\\/g, '\\\\')   // escape lone backslashes first
+              .replace(/\n/g, '\\n')    // newlines → \n
+              .replace(/\r/g, '\\r')    // carriage returns → \r
+              .replace(/\t/g, '\\t')    // tabs → \t
+              .replace(/\\\\/g, '\\');  // undo double-escaped backslashes we already had
+            return `: "${fixed}"${trail}`;
+          });
+        try {
+          return JSON.parse(repaired);
+        } catch {
+          throw new Error(`The AI returned a response that could not be parsed. Please try again. (Detail: ${parseErr.message})`);
+        }
+      }
     }
 
     let currentInput = '';
