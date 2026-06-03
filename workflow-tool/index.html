@@ -330,6 +330,10 @@
     .type-pill.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .type-pill:disabled { opacity: 0.5; cursor: not-allowed; }
     .type-pill.cached::after { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--royal); border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+    .s2-pedagogy-panel { min-height: 52px; margin-top: 12px; margin-bottom: 4px; padding: 12px 14px; background: var(--whisper); border-radius: 8px; border: 0.5px solid var(--hatteras); display: none; }
+    .s2-pedagogy-panel.visible { display: block; }
+    .s2-pedagogy-goal { display: block; font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--navy); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
+    .s2-pedagogy-note { display: block; font-size: 0.85rem; color: var(--cast-iron); line-height: 1.55; }
     .type-pill:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
 
     .s2-regenerating { font-size: 0.78rem; color: var(--graphite); font-style: italic; display: none; margin-top: 6px; }
@@ -545,14 +549,13 @@
           ></iframe>
         </div>
 
-        <p class="s2-type-label">Try a different interaction type</p>
+        <p class="s2-type-label">Explore other approaches for this content</p>
         <div class="s2-type-buttons" id="s2-type-buttons" role="group" aria-label="Interaction type options">
-          <button class="type-pill" data-type="Accordion">Accordion</button>
-          <button class="type-pill" data-type="Tabbed Explorer">Tabbed explorer</button>
-          <button class="type-pill" data-type="Inline Quiz">Inline quiz</button>
-          <button class="type-pill" data-type="Click-to-Reveal">Click-to-reveal</button>
-          <button class="type-pill" data-type="Image Hotspot">Image hotspot</button>
-          <button class="type-pill" data-type="Branching Scenario">Branching scenario</button>
+          <!-- Populated dynamically from API available_types -->
+        </div>
+        <div class="s2-pedagogy-panel" id="s2-pedagogy-panel" aria-live="polite">
+          <span class="s2-pedagogy-goal" id="s2-pedagogy-goal"></span>
+          <span class="s2-pedagogy-note" id="s2-pedagogy-note"></span>
         </div>
         <p class="s2-regenerating" id="s2-regenerating">Regenerating...</p>
 
@@ -664,12 +667,21 @@ The designer will describe a content challenge in plain language. Your job is to
 AVAILABLE INTERACTION TYPES:
 You may only recommend from this list. Do not suggest anything outside it.
 
-- Tabbed explorer: best for multi-part concepts where each part is distinct and roughly equal in importance. Learners navigate at their own pace. Good for 3-5 tabs. Always use a single horizontal row of tabs — never more items than fit on one line. If content has more than 5 parts, scope it down rather than adding more tabs.
-- Accordion: best for content where learners may already know some sections or want to scan before reading. Good for term spotlights, FAQs, layered explanations.
-- Inline quiz: best for immediate reinforcement of a concept just introduced. Multiple choice with feedback. Good when there is a clearly correct answer the learner should be able to identify.
-- Click-to-reveal: best for definitions, short explanations, or anything where the reveal itself is part of the learning — the learner makes a prediction before seeing the answer.
-- Image hotspot: best when a visual (diagram, screenshot, interface, anatomy) is central to understanding. Learners click regions to reveal explanations.
-- Branching scenario: best for decision-making practice where context and consequences matter. Good for clinical, ethical, or professional judgment situations.
+Each type serves a distinct learning function. Understand the difference before recommending.
+
+- Tabbed explorer: LEARNING FUNCTION — comprehension of parallel concepts. Learners see all tab labels at once and navigate between them. The overview is part of the value. Use when content has 3–5 parts of roughly equal weight and learners benefit from comparing or moving between them. Always use a single horizontal row of tabs — never more than 5. If content has more than 5 parts, scope it down.
+
+- Accordion: LEARNING FUNCTION — selective comprehension and reference. Learners scan all headings first, then choose what to open. Use when learners may already know some sections, when content is reference material they might return to, or when the heading itself signals meaning. The cognitive act is navigate-then-read, not predict-then-confirm.
+
+- Inline quiz: LEARNING FUNCTION — knowledge check and reinforcement. A single multiple-choice question with immediate feedback. Use only when content was just introduced and there is a clearly correct answer. The learning value is confirmation and error correction — not exploration or retrieval practice.
+
+- Click-to-reveal: LEARNING FUNCTION — retrieval practice and recall. Learners see a term, abbreviation, or prompt and must attempt to recall the answer before the reveal. This retrieval attempt — even an unsuccessful one — strengthens memory encoding more than passive reading. Use when the goal is internalization of vocabulary, abbreviations, or key distinctions, not just understanding them.
+
+- Sequencing: LEARNING FUNCTION — procedural understanding. Learners arrange steps, stages, or events in the correct order. Use when sequence matters and getting it wrong has consequences — clinical protocols, research methods, process flows. The act of deciding what comes before what requires deeper processing than reading a numbered list.
+
+- Drag-to-classify: LEARNING FUNCTION — schema building and categorization. Learners sort items into two or three labeled groups. Use when the goal is understanding how things are grouped and why — not just what they are. Good for distinguishing similar concepts, sorting examples into categories, or applying a framework to new cases.
+
+- Annotated text: LEARNING FUNCTION — guided close reading. A passage of real text with clickable highlights that reveal explanations or commentary. Use when the original text itself is the learning object — a clinical note, policy excerpt, research abstract, or primary source — and learners need support interpreting it. Keeps the text intact while adding a guided reading layer.
 
 ---
 
@@ -682,14 +694,16 @@ Before deciding what to include in the interaction, decide what to leave out. Th
 - The static companion text should summarize what the interaction covers — it is not a place to include everything that didn't fit
 
 DECISION RULES:
-- If the content has 3 or more distinct components of roughly equal weight → tabs or accordion
-- If the content introduces new vocabulary → accordion or click-to-reveal
-- If the content has a visual at its center → image hotspot
-- If the content is asking learners to practice a judgment or decision → branching scenario
-- If the content just taught something and needs a quick check → inline quiz
-- When in doubt between two types, choose the simpler one
-- Never recommend branching scenario unless the content genuinely involves a decision with meaningful consequences
-- For coding or technical content in this tool, assume it is conceptual — not hands-on. Do not generate actual runnable code environments. Use visual styling that suggests a technical context without requiring code execution.
+- If the learning goal is recall or retention of terms/abbreviations → click-to-reveal
+- If the learning goal is comprehension of distinct parallel concepts → tabs or accordion
+- If the learning goal is understanding a process or sequence → sequencing
+- If the learning goal is categorization or applying a framework → drag-to-classify
+- If the learning goal is interpreting a real passage of text → annotated text
+- If the content just introduced something and needs a quick check → inline quiz
+- Accordion vs. tabs: use accordion when learners might already know some items and benefit from scanning; use tabs when all items are equally unfamiliar and benefit from side-by-side navigation
+- Accordion vs. click-to-reveal: use accordion when comprehension is the goal; use click-to-reveal when recall is the goal
+- When in doubt between two types, choose the one whose learning function most closely matches the stated or implied learning goal
+- For coding or technical content, assume it is conceptual — not hands-on. Use visual styling that suggests a technical context without requiring code execution.
 
 ---
 
@@ -753,15 +767,24 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
 {
   "recommendation": {
     "type": "Name of interaction type",
-    "rationale": "2-3 sentences explaining why this type fits this specific content and learning situation."
+    "rationale": "2-3 sentences explaining why this type fits this specific content and learning situation. Be specific about the learning goal it serves."
   },
+  "available_types": [
+    {
+      "type": "Name of interaction type",
+      "learning_goal": "3-6 word phrase naming the cognitive goal — e.g. Recall and retrieval practice",
+      "pedagogical_note": "1-2 sentences explaining what this type does cognitively and why it fits or differs from the recommendation for this specific content."
+    }
+  ],
   "visual_theme": "One sentence describing the visual approach chosen and why.",
   "json": {
     "html": "complete self-contained HTML and CSS string with Duke brand applied",
     "script": "complete JavaScript string using addEventListener only, no inline handlers"
   },
-"static": "Full static companion text in plain prose. 2-4 paragraphs."
+  "static": "Full static companion text in plain prose. 2-4 paragraphs."
 }
+
+The available_types array must include the recommended type first, followed by 2-4 other types that are genuinely appropriate for this content — meaning an LX designer could reasonably choose them depending on their specific learning goal. Exclude types that do not fit this content at all. Each pedagogical_note should be specific to this content, not generic.
 
 Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no \`\`\`json, no \`\`\` — just the object itself starting with { and ending with }.
 
@@ -780,10 +803,15 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
           "type": "Accordion",
           "rationale": "This content introduces five distinct nursing assessment frameworks that learners may encounter unevenly — some will already know SBAR, others will not. The accordion format lets learners scan all five terms at once and choose which to read in depth, respecting prior knowledge and reducing cognitive load. Because each framework is a discrete named concept with a structured explanation, the glossary-style accordion is the clearest match."
         },
+        "available_types": [
+          { "type": "Accordion", "learning_goal": "Selective comprehension and reference", "pedagogical_note": "Learners see all five framework names at once before opening any. This overview supports scanning — learners can skip what they already know and focus on what they don't. Best when prior knowledge is uneven across the group." },
+          { "type": "Click-to-reveal", "learning_goal": "Recall and retrieval practice", "pedagogical_note": "If the goal shifts from comprehension to memorization, click-to-reveal prompts learners to retrieve each full framework name from the abbreviation before confirming. The retrieval attempt — even an unsuccessful one — strengthens long-term retention more than reading." },
+          { "type": "Tabbed explorer", "learning_goal": "Parallel navigation and comparison", "pedagogical_note": "If learners need to compare frameworks side-by-side or navigate between their details repeatedly, tabs give each framework its own persistent panel. Best when all frameworks are equally unfamiliar and the internal structure of each (full name, when to use, key steps) benefits from a dedicated layout." }
+        ],
         "visual_theme": "Clinical EHR aesthetic using Eno green (#339898) as the accent color, Roboto Mono for framework abbreviations to suggest clinical documentation, and structured row layouts that reference the visual language of electronic health record interfaces.",
         "json": {
           "html": "<div style=\"font-family: 'Open Sans', Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"font-family: 'Montserrat', Arial, sans-serif; color: #012169; font-size: 1.25rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"accordion-container\"></div></div>",
-          "script": "const frameworks = [{term: 'SBAR', def: 'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term: 'HEAD-TO-TOE', def: 'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term: 'OLDCARTS', def: 'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term: 'ABCDE', def: 'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term: 'CIWA-Ar', def: 'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; const container = document.getElementById('accordion-container'); frameworks.forEach((f, i) => { const item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; const btn = document.createElement('button'); btn.setAttribute('aria-expanded', 'false'); btn.style.cssText = 'width: 100%; text-align: left; padding: 14px 16px; background: white; border: none; cursor: pointer; font-family: Roboto Mono, Courier New, monospace; font-size: 0.95rem; color: #012169; display: flex; justify-content: space-between; align-items: center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; const panel = document.createElement('div'); panel.style.cssText = 'display: none; padding: 14px 16px; font-size: 0.9rem; color: #262626; border-top: 0.5px solid #E2E6ED; line-height: 1.6;'; panel.textContent = f.def; btn.addEventListener('click', () => { const open = btn.getAttribute('aria-expanded') === 'true'; btn.setAttribute('aria-expanded', String(!open)); panel.style.display = open ? 'none' : 'block'; btn.querySelector('span').textContent = open ? '+' : '-'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); });"
+          "script": "(function(){ function init(){ var frameworks = [{term:'SBAR',def:'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term:'HEAD-TO-TOE',def:'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term:'OLDCARTS',def:'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term:'ABCDE',def:'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term:'CIWA-Ar',def:'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; var container = document.getElementById('accordion-container'); frameworks.forEach(function(f){ var item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; var btn = document.createElement('button'); btn.setAttribute('aria-expanded','false'); btn.style.cssText = 'width:100%;text-align:left;padding:14px 16px;background:white;border:none;cursor:pointer;font-family:Roboto Mono,Courier New,monospace;font-size:0.95rem;color:#012169;display:flex;justify-content:space-between;align-items:center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; var panel = document.createElement('div'); panel.style.cssText = 'display:none;padding:14px 16px;font-size:0.9rem;color:#262626;border-top:0.5px solid #E2E6ED;line-height:1.6;'; panel.textContent = f.def; btn.addEventListener('click',function(){ var open = btn.getAttribute('aria-expanded')==='true'; btn.setAttribute('aria-expanded',String(!open)); panel.style.display = open?'none':'block'; btn.querySelector('span').textContent = open?'+':'-'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); }); } if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();} })()"
         },
         "static": "Nursing practice relies on a set of standardized assessment frameworks that bring consistency and clarity to clinical documentation and communication. These frameworks are not interchangeable — each serves a distinct purpose and is applied in different clinical contexts, so nurses must understand when and why to use each one.\n\nSBAR (Situation, Background, Assessment, Recommendation) is the most widely used handoff communication tool in acute care settings. It gives nurses a predictable structure for reporting patient status changes to physicians or during shift transitions. HEAD-TO-TOE assessment is a systematic physical examination sequence that ensures no body system is overlooked during routine assessments.\n\nOLDCARTS guides symptom analysis by capturing the full character of a patient complaint — when it started, where it is, how long it lasts, what it feels like, and what makes it better or worse. ABCDE (Airway, Breathing, Circulation, Disability, Exposure) is the rapid primary survey framework used in emergency and deterioration scenarios. Finally, CIWA-Ar is a validated clinical instrument specifically for monitoring patients at risk of alcohol withdrawal, with scored items that guide medication decisions.\n\nTogether, these frameworks form the structural backbone of nursing assessment. Familiarity with all five — and clarity about when each applies — is foundational to safe, communicative practice."
       },
@@ -839,18 +867,15 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         },
         "static": "Clinical assessment frameworks can be understood as applying to different domains of nursing practice: some map to the physical body, some to clinical communication, and some to structured symptom analysis. This visual mapping makes those distinctions tangible rather than abstract.\n\nABCDE is the most spatially immediate framework — it literally moves through physiological systems in the order most critical to survival, beginning with airway and ending with full-body exposure. HEAD-TO-TOE is similarly body-anchored, progressing from neurological assessment at the head through every system to the extremities. Both frameworks have an inherent spatial logic that a body diagram can reinforce.\n\nSBAR and OLDCARTS have no direct anatomical anchor — SBAR structures communication between clinicians, and OLDCARTS structures the nurse's conversation with the patient about a symptom. Mapping them to a body figure makes the point that they are applied in the context of a patient encounter but are not themselves physical assessment sequences.\n\nCIWA-Ar occupies a middle ground: it involves observing physical signs (tremor, diaphoresis, agitation) and asking the patient questions, but its output is a numerical score rather than a body-system documentation. Treating it as a distinct category in a visual framework helps learners understand that validated scoring tools are a different kind of clinical instrument from open-ended assessment frameworks."
       },
-      "Branching Scenario": {
-        "type": "Branching Scenario",
-        "recommendation": {
-          "type": "Branching Scenario",
-          "rationale": "A branching scenario places learners in the role of a practicing nurse and asks them to make decisions under simulated pressure, which develops the contextual judgment that factual knowledge alone cannot build. The scenario tests not just knowledge of SBAR but the ability to recognize when a structured communication framework is needed and to select the right one over plausible alternatives. Branching consequences make the stakes of each decision concrete, reinforcing correct reasoning and clarifying the cost of errors."
-        },
-        "visual_theme": "Clinical decision environment using Duke Copper (#C84E00) as the accent color for decision-point prompts and choice buttons to signal active judgment moments, Eno green (#339898) for positive outcome screens confirming correct paths, and Duke Navy (#012169) for scenario narrative text — creating a tonal shift between story, decision, and resolution.",
-        "json": {
-          "html": "<div style=\"font-family: Arial, sans-serif; max-width: 700px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><div id=\"branch-container\"></div></div>",
-          "script": "var scenes = {start:{type:'scene',title:'Incoming Page',text:'You are the night-shift nurse on a medical-surgical floor. At 2:14 AM, you receive a page: your patient in room 412, Mr. Okafor, has become acutely confused. He is 68 years old, admitted two days ago for a hip replacement. When you arrive at the bedside, he is agitated, pulling at his IV line, and does not know where he is. His vitals: HR 108, BP 144/90, SpO2 94% on room air, RR 22.',decision:'You need to act. What do you do first?',choices:[{label:'Run through ABCDE to quickly assess for an acute physiological threat before anything else.',next:'abcde_correct'},{label:'Call the physician immediately and describe what you are seeing.',next:'call_first_wrong'}]},abcde_correct:{type:'scene',title:'Primary Survey',text:'You run through ABCDE. Airway: patent, speaking in full sentences though confused. Breathing: RR 22, SpO2 94%, mild use of accessory muscles. Circulation: HR 108, BP 144/90, peripherally warm. Disability: confused and agitated, AVPU = V (responds to voice). Exposure: no signs of bleeding, no rash, surgical wound clean and intact. You apply supplemental oxygen and his SpO2 rises to 97%. The acute life threats are addressed. Now you need to escalate.',decision:'How do you communicate this to the on-call physician?',choices:[{label:'Use SBAR to structure your call — Situation, Background, Assessment, Recommendation.',next:'sbar_correct'},{label:'Describe the scene as you observed it, starting with what woke you up and working through what you found.',next:'unstructured_wrong'}]},call_first_wrong:{type:'outcome',positive:false,title:'Missed Step',text:'You call the physician before completing your own assessment. The physician asks: Is his airway clear? What is his oxygen saturation? You do not have the answers. The physician asks you to call back when you have completed your assessment. Returning to the bedside costs time, and you realize you should have completed your primary survey first. ABCDE gives you the information you need before you escalate.',choices:[{label:'Start over',next:'start'}]},sbar_correct:{type:'outcome',positive:true,title:'Effective Escalation',text:'You call the on-call physician using SBAR. Situation: Mr. Okafor in 412 has new acute confusion and agitation since approximately 2 AM. Background: post-op day 2 from right hip replacement, no prior cognitive history, was oriented at 10 PM check. Assessment: vitals show tachycardia and mild hypoxia now corrected with O2, confusion may represent post-op delirium, pain crisis, or early infection. Recommendation: requesting orders to assess further and consider pain management review. The physician thanks you for the clear handoff and provides orders within two minutes. Mr. Okafor is assessed, his pain is managed, and he settles by 3 AM.',choices:[{label:'Restart scenario',next:'start'}]},unstructured_wrong:{type:'outcome',positive:false,title:'Communication Breakdown',text:'You describe the scene as you experienced it — the page, walking into the room, the agitation, the vitals in the order you took them. The physician interrupts twice for clarification. It takes four minutes to convey what could have been communicated in under ninety seconds. The physician is frustrated and asks for a cleaner summary. SBAR exists precisely to avoid this: it gives both the nurse and the physician a shared expectation of what information will come in what order.',choices:[{label:'Try again',next:'start'}]}}; var container = document.getElementById('branch-container'); function render(key) { container.innerHTML = ''; var scene = scenes[key]; var isPositive = scene.positive === true; var isNegative = scene.positive === false; var headerColor = scene.type === 'outcome' ? (isPositive ? '#339898' : '#C84E00') : '#012169'; var bgColor = scene.type === 'outcome' ? (isPositive ? '#E8F5F5' : '#FDF0EA') : 'white'; var card = document.createElement('div'); card.style.cssText = 'background:' + bgColor + ';border-radius:10px;padding:24px;box-shadow:0 1px 5px rgba(0,0,0,0.1);'; var badge = document.createElement('div'); badge.style.cssText = 'font-size:0.75rem;font-weight:bold;text-transform:uppercase;letter-spacing:0.09em;color:' + headerColor + ';margin-bottom:8px;'; badge.textContent = scene.type === 'scene' ? 'Decision Point' : (isPositive ? 'Positive Outcome' : 'Learning Moment'); card.appendChild(badge); var h = document.createElement('h2'); h.style.cssText = 'color:#012169;font-size:1.05rem;margin:0 0 14px;'; h.textContent = scene.title; card.appendChild(h); var p = document.createElement('p'); p.style.cssText = 'color:#262626;font-size:0.9rem;line-height:1.65;margin:0 0 18px;'; p.textContent = scene.text; card.appendChild(p); if (scene.decision) { var q = document.createElement('p'); q.style.cssText = 'color:#C84E00;font-size:0.88rem;font-weight:bold;margin:0 0 12px;'; q.textContent = scene.decision; card.appendChild(q); } scene.choices.forEach(function(ch) { var btn = document.createElement('button'); btn.style.cssText = 'display:block;width:100%;text-align:left;margin-bottom:10px;padding:12px 16px;border:2px solid #C84E00;border-radius:8px;background:white;cursor:pointer;font-size:0.87rem;color:#262626;line-height:1.5;'; if (scene.type === 'outcome') { btn.style.borderColor = isPositive ? '#339898' : '#C84E00'; btn.style.color = isPositive ? '#1a6060' : '#7a2e00'; btn.style.fontWeight = 'bold'; btn.style.fontSize = '0.85rem'; } btn.textContent = ch.label; btn.addEventListener('mouseover', function() { btn.style.background = '#F5F5F5'; }); btn.addEventListener('mouseout', function() { btn.style.background = 'white'; }); btn.addEventListener('click', function() { render(ch.next); }); card.appendChild(btn); }); container.appendChild(card); } render('start');"
-        },
-        "static": "This branching scenario places the learner in a night-shift nursing situation and tests two sequential decisions: whether to complete a primary survey before escalating, and whether to use SBAR when making the escalation call. The scenario is designed so that each wrong path produces a realistic consequence — not a generic 'incorrect' message, but an outcome that reflects how the error would actually play out at the bedside.\n\nThe first decision point tests whether learners recognize that ABCDE belongs before the phone call. Calling a physician without completing your own assessment leaves you unable to answer their questions and results in a second call. This mirrors a common pattern in clinical settings where inexperienced nurses escalate before they have gathered the information needed to support that escalation.\n\nThe second decision point tests whether learners can select SBAR over an unstructured verbal account. Both paths involve communicating with the physician, but only SBAR gives the physician information in the structured format they expect. Unstructured communication leads to interruptions, frustration, and delayed orders — all realistic consequences with direct patient safety implications.\n\nThe positive outcome path reinforces the full reasoning chain: ABCDE first to identify and address acute threats, then SBAR to communicate findings and receive orders efficiently. Together, these two frameworks represent the acute assessment and communication sequence that nursing students will use throughout their clinical careers."
+      "Sequencing": {
+        "type": "Sequencing",
+        "recommendation": { "type": "Sequencing", "rationale": "Mock sequencing response for sample content." },
+        "available_types": [
+          { "type": "Sequencing", "learning_goal": "Procedural understanding", "pedagogical_note": "Learners arrange steps in the correct order, which requires understanding why each step precedes the next — deeper processing than reading a numbered list." }
+        ],
+        "visual_theme": "Clean procedural layout using Duke Navy and Whisper Gray.",
+        "json": { "html": "<div style=\"font-family:'Open Sans',Arial,sans-serif;padding:24px;background:#F3F2F1;\"><p style=\"color:#012169;font-weight:600;\">Sequencing interaction — replace with real API call</p></div>", "script": "(function(){ function init(){} if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();} })()" },
+        "static": "Sample sequencing static text."
       }
     };
 
@@ -962,9 +987,13 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     const s2RationaleText = document.getElementById('s2-rationale-text');
     const previewIframe = document.getElementById('preview-iframe');
     const previewShimmer = document.getElementById('preview-shimmer');
-    const s2TypeButtons = document.querySelectorAll('.type-pill');
-    const s2Regenerating = document.getElementById('s2-regenerating');
-    const s2ConfirmBtn = document.getElementById('s2-confirm-btn');
+    let s2TypeButtons = []; // populated dynamically when API response arrives
+    const s2TypeButtonsContainer = document.getElementById('s2-type-buttons');
+    const s2PedagogyPanel = document.getElementById('s2-pedagogy-panel');
+    const s2PedagogyGoal  = document.getElementById('s2-pedagogy-goal');
+    const s2PedagogyNote  = document.getElementById('s2-pedagogy-note');
+    const s2Regenerating  = document.getElementById('s2-regenerating');
+    const s2ConfirmBtn    = document.getElementById('s2-confirm-btn');
     const s2StartOver = document.getElementById('s2-start-over');
     const backToPreviewLink = document.getElementById('back-to-preview-link');
     const s3GenerateBtn    = document.getElementById('s3-generate-btn');
@@ -987,12 +1016,62 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
 
     // Normalise a type name from Claude's response to match the button data-type
     // values (case-insensitive). Falls back to the raw value if no match found.
+    // Normalise a type name to the canonical form used as the button data-type
     function normalizeType(typeName) {
       if (!typeName) return typeName;
-      const match = Array.from(s2TypeButtons).find(
+      const match = s2TypeButtons.find(
         btn => btn.dataset.type.toLowerCase() === typeName.toLowerCase()
       );
       return match ? match.dataset.type : typeName;
+    }
+
+    function showPedagogyNote(typeInfo) {
+      s2PedagogyGoal.textContent = typeInfo.learning_goal || '';
+      s2PedagogyNote.textContent = typeInfo.pedagogical_note || '';
+      s2PedagogyPanel.classList.add('visible');
+    }
+
+    // Build type buttons dynamically from the API's available_types array
+    function renderTypeButtons(availableTypes, recommendedType) {
+      s2TypeButtonsContainer.innerHTML = '';
+      s2TypeButtons = [];
+      availableTypes.forEach(typeInfo => {
+        const btn = document.createElement('button');
+        btn.className = 'type-pill';
+        btn.dataset.type = typeInfo.type;
+        btn.textContent = typeInfo.type;
+        if (typeInfo.type === recommendedType) btn.classList.add('active');
+        s2TypeButtonsContainer.appendChild(btn);
+        s2TypeButtons.push(btn);
+
+        // Show pedagogy note on hover / focus
+        btn.addEventListener('mouseenter', () => showPedagogyNote(typeInfo));
+        btn.addEventListener('focus',      () => showPedagogyNote(typeInfo));
+
+        // Click to switch type
+        btn.addEventListener('click', async () => {
+          const type = btn.dataset.type;
+          const currentTypeName = currentResult && currentResult.recommendation
+            ? normalizeType(currentResult.recommendation.type)
+            : '';
+          if (type === currentTypeName) return;
+          if (typeCache[type]) { updatePreview(typeCache[type]); return; }
+          s2TypeButtons.forEach(b => b.disabled = true);
+          s2Regenerating.classList.add('visible');
+          try {
+            const result = await callClaude(currentInput, type);
+            updatePreview(result);
+          } catch (err) {}
+          finally {
+            s2TypeButtons.forEach(b => b.disabled = false);
+            s2Regenerating.classList.remove('visible');
+          }
+        });
+      });
+
+      // Show recommended type's note by default
+      const rec = availableTypes.find(t => t.type === recommendedType);
+      if (rec) showPedagogyNote(rec);
     }
 
     function setStep2Substate(state) {
@@ -1022,8 +1101,8 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
 
     function updatePreview(result) {
       currentResult = result;
-      const rawType = result.recommendation ? result.recommendation.type : result.type;
-      const typeName = normalizeType(rawType);
+      const rawType  = result.recommendation ? result.recommendation.type : result.type;
+      const typeName = normalizeType(rawType) || rawType;
       const rationale = result.recommendation ? result.recommendation.rationale : '';
 
       // Store in session cache keyed by normalised type name
@@ -1032,11 +1111,17 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       s2RecommendBadge.textContent = 'Recommended: ' + typeName;
       s2RationaleText.textContent = rationale;
 
-      // Mark active button; add a small dot to any button that has a cached result
-      s2TypeButtons.forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.type === typeName);
-        btn.classList.toggle('cached', !!(typeCache[btn.dataset.type]) && btn.dataset.type !== typeName);
-      });
+      // Render type buttons from available_types if present (initial load)
+      // or just update active/cached state (subsequent type switches)
+      if (result.available_types && result.available_types.length) {
+        renderTypeButtons(result.available_types, typeName);
+      } else {
+        // Fallback: just update active + cached state on existing buttons
+        s2TypeButtons.forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.type === typeName);
+          btn.classList.toggle('cached', !!(typeCache[btn.dataset.type]) && btn.dataset.type !== typeName);
+        });
+      }
 
       setPreviewIframe(result);
     }
@@ -1067,32 +1152,6 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
         errorBox.style.display = 'block';
       }
-    });
-
-    s2TypeButtons.forEach(btn => {
-      btn.addEventListener('click', async () => {
-        const type = btn.dataset.type;
-        const currentTypeName = currentResult && currentResult.recommendation ? currentResult.recommendation.type : (currentResult ? currentResult.type : '');
-        if (type === currentTypeName) return;
-
-        // If we already generated this type, show it instantly from cache
-        if (typeCache[type]) {
-          updatePreview(typeCache[type]);
-          return;
-        }
-
-        // Otherwise call the API
-        s2TypeButtons.forEach(b => b.disabled = true);
-        s2Regenerating.classList.add('visible');
-        try {
-          const result = await callClaude(currentInput, type);
-          updatePreview(result);
-        } catch (err) {}
-        finally {
-          s2TypeButtons.forEach(b => b.disabled = false);
-          s2Regenerating.classList.remove('visible');
-        }
-      });
     });
 
     s2ConfirmBtn.addEventListener('click', () => {
