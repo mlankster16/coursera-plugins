@@ -169,8 +169,12 @@
 
     .challenge-textarea::placeholder { color: #aab; }
 
-    .char-count { font-size: 0.78rem; color: var(--graphite); margin-top: 6px; text-align: right; }
+    .step1-input-meta { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+    .char-count { font-size: 0.78rem; color: var(--graphite); }
     .char-count.warn { color: var(--persimmon); }
+    .example-link { background: none; border: none; padding: 0; font-family: 'Open Sans', Arial, sans-serif; font-size: 0.78rem; color: var(--royal); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+    .example-link:hover { color: var(--navy); }
+    .example-link:focus-visible { outline: 2px solid var(--persimmon); outline-offset: 3px; border-radius: 2px; }
 
     .btn-primary {
       display: inline-flex;
@@ -492,7 +496,10 @@
         aria-describedby="char-count-hint"
         maxlength="10000"
       ></textarea>
-      <div class="char-count" id="char-count-hint" aria-live="polite">0 / 10000 — 50 characters minimum to analyze</div>
+      <div class="step1-input-meta">
+        <div class="char-count" id="char-count-hint" aria-live="polite">0 / 10000 — 50 characters minimum to analyze</div>
+        <button type="button" class="example-link" id="example-btn">Try an example</button>
+      </div>
       <div class="error-box" id="error-box" role="alert"></div>
       <button class="btn-primary" id="analyze-btn" disabled aria-disabled="true">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -949,10 +956,13 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
 
     const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3'), 4: document.getElementById('step-4') };
     const stepLabel = document.getElementById('step-label');
-    const textarea = document.getElementById('challenge-input');
-    const charCount = document.getElementById('char-count-hint');
-    const analyzeBtn = document.getElementById('analyze-btn');
-    const errorBox = document.getElementById('error-box');
+    const textarea    = document.getElementById('challenge-input');
+    const charCount   = document.getElementById('char-count-hint');
+    const analyzeBtn  = document.getElementById('analyze-btn');
+    const errorBox    = document.getElementById('error-box');
+    const exampleBtn  = document.getElementById('example-btn');
+
+    const EXAMPLE_CHALLENGE = `I'm building a module on nursing assessment frameworks for second-year nursing students. The reading lists five tools — SBAR, HEAD-TO-TOE, OLDCARTS, ABCDE, and CIWA-Ar — with a paragraph explaining each one. The problem is that learners are finishing the reading without a clear sense of when to use which framework or how they differ from each other. They can define the terms but struggle to apply them. Most students will already know SBAR and ABCDE from earlier modules, but HEAD-TO-TOE, OLDCARTS, and CIWA-Ar are new. I want something that helps them distinguish between the frameworks and understand the clinical context for each one, without just repeating the text.`;
     const step2El = document.getElementById('step-2');
     const s2RecommendBadge  = document.getElementById('s2-recommendation-badge');
     const s2RationaleText   = document.getElementById('s2-rationale-text');
@@ -1117,6 +1127,18 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       analyzeBtn.disabled = !meetsMin;
       analyzeBtn.setAttribute('aria-disabled', String(!meetsMin));
       errorBox.style.display = 'none';
+    });
+
+    exampleBtn.addEventListener('click', () => {
+      textarea.value = EXAMPLE_CHALLENGE;
+      textarea.dispatchEvent(new Event('input')); // trigger char count + button enable
+      textarea.focus();
+      exampleBtn.textContent = 'Example loaded';
+      exampleBtn.disabled = true;
+      setTimeout(() => {
+        exampleBtn.textContent = 'Try an example';
+        exampleBtn.disabled = false;
+      }, 2000);
     });
 
     analyzeBtn.addEventListener('click', async () => {
