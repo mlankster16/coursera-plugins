@@ -262,6 +262,9 @@
     .s2-start-over:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; border-radius: 3px; }
 
     .s2-rationale { font-size: 0.9rem; color: var(--graphite); font-style: italic; line-height: 1.6; margin-bottom: 20px; }
+    .s2-out-of-scope { display: flex; gap: 10px; align-items: flex-start; background: #FDF0EA; border: 1.5px solid #C84E00; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 0.88rem; color: var(--cast-iron); line-height: 1.55; }
+    .s2-out-of-scope strong { color: #C84E00; display: block; margin-bottom: 4px; font-family: 'Montserrat', Arial, sans-serif; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .s2-out-of-scope-sub { display: block; margin-top: 6px; color: var(--graphite); font-style: italic; }
 
     .s2-preview-label {
       font-family: 'Montserrat', Arial, sans-serif;
@@ -517,6 +520,15 @@
           </a>
         </div>
 
+        <div class="s2-out-of-scope" id="s2-out-of-scope" style="display:none;" role="alert">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="#C84E00" stroke-width="1.5"/><path d="M8 4.5v4" stroke="#C84E00" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.75" fill="#C84E00"/></svg>
+          <div>
+            <strong>This challenge is outside the tool's scope.</strong>
+            <span id="s2-out-of-scope-detail"></span>
+            <span class="s2-out-of-scope-sub">The closest available alternative is shown below.</span>
+          </div>
+        </div>
+
         <p class="s2-rationale" id="s2-rationale-text"></p>
 
         <p class="s2-preview-label">Live Preview</p>
@@ -686,7 +698,8 @@ DECISION RULES:
 - Accordion vs. click-to-reveal: use accordion when comprehension is the goal; use click-to-reveal when recall is the goal
 - When in doubt between two types, choose the one whose learning function most closely matches the stated or implied learning goal
 - For coding or technical content, assume it is conceptual — not hands-on. Use visual styling that suggests a technical context without requiring code execution.
-- If a designer asks for a live coding environment, code editor, or any interaction where learners write and run real code, this is outside the scope of this tool. Redirect to the closest applicable type — usually an inline quiz testing conceptual understanding of the code's logic, a click-to-reveal for key syntax or terminology, or an annotated text interaction if there is a code snippet worth close reading. Explain clearly in the rationale why the original request is out of scope and what the suggested alternative offers instead.
+- If a designer asks for a live coding environment, code editor, or any interaction where learners write and run real code, this is outside the scope of this tool. Redirect to the closest applicable type — usually an inline quiz testing conceptual understanding of the code's logic, a click-to-reveal for key syntax or terminology, or an annotated text interaction if there is a code snippet worth close reading. Begin the rationale field with exactly the phrase "OUT OF SCOPE:" followed by a clear explanation of why the request doesn't fit and what the alternative offers instead.
+- If a challenge does not fit any available interaction type for any reason, begin the rationale with "OUT OF SCOPE:" and explain why, then generate the closest alternative.
 
 ---
 
@@ -941,8 +954,10 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     const analyzeBtn = document.getElementById('analyze-btn');
     const errorBox = document.getElementById('error-box');
     const step2El = document.getElementById('step-2');
-    const s2RecommendBadge = document.getElementById('s2-recommendation-badge');
-    const s2RationaleText = document.getElementById('s2-rationale-text');
+    const s2RecommendBadge  = document.getElementById('s2-recommendation-badge');
+    const s2RationaleText   = document.getElementById('s2-rationale-text');
+    const s2OutOfScope      = document.getElementById('s2-out-of-scope');
+    const s2OutOfScopeDetail = document.getElementById('s2-out-of-scope-detail');
     const previewIframe = document.getElementById('preview-iframe');
     const previewShimmer = document.getElementById('preview-shimmer');
     let s2TypeButtons = []; // populated dynamically when API response arrives
@@ -1066,7 +1081,17 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       // Store in session cache keyed by normalised type name
       typeCache[typeName] = result;
 
-      s2RecommendBadge.textContent = 'Recommended: ' + typeName;
+      // Detect out-of-scope responses and surface a visible banner
+      const isOutOfScope = rationale.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
+      s2OutOfScope.style.display = isOutOfScope ? 'flex' : 'none';
+      if (isOutOfScope) {
+        s2OutOfScopeDetail.textContent = ' ' + rationale.replace(/^out of scope:\s*/i, '');
+        s2RationaleText.style.display = 'none';
+      } else {
+        s2RationaleText.style.display = '';
+      }
+
+      s2RecommendBadge.textContent = (isOutOfScope ? 'Closest alternative: ' : 'Recommended: ') + typeName;
       s2RationaleText.textContent = rationale;
 
       // Render type buttons from available_types if present (initial load)
