@@ -490,9 +490,9 @@
         class="challenge-textarea"
         placeholder="Example: I have a module on nursing assessment frameworks that lists five different tools — SBAR, HEAD-TO-TOE, OLDCARTS, ABCDE, and CIWA-Ar. Right now it's just five paragraphs of text. Learners need to know when and why to use each one, but the content feels dense and hard to scan. Most learners will already know at least one or two of these frameworks."
         aria-describedby="char-count-hint"
-        maxlength="4000"
+        maxlength="10000"
       ></textarea>
-      <div class="char-count" id="char-count-hint" aria-live="polite">0 / 4000 — 50 characters minimum to analyze</div>
+      <div class="char-count" id="char-count-hint" aria-live="polite">0 / 10000 — 50 characters minimum to analyze</div>
       <div class="error-box" id="error-box" role="alert"></div>
       <button class="btn-primary" id="analyze-btn" disabled aria-disabled="true">
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><circle cx="7" cy="7" r="5" stroke="currentColor" stroke-width="1.5"/><path d="M11 11l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
@@ -1112,7 +1112,7 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     textarea.addEventListener('input', () => {
       const len = textarea.value.length;
       const meetsMin = len >= 50;
-      charCount.textContent = `${len} / 4000${meetsMin ? '' : ' — 50 characters minimum to analyze'}`;
+      charCount.textContent = `${len} / 10000${meetsMin ? '' : ' — 50 characters minimum to analyze'}`;
       charCount.classList.toggle('warn', !meetsMin && len > 0);
       analyzeBtn.disabled = !meetsMin;
       analyzeBtn.setAttribute('aria-disabled', String(!meetsMin));
