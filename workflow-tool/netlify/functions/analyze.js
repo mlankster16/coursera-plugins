@@ -46,18 +46,22 @@ exports.handler = async (event) => {
     messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
   }
 
-  // Call the Claude API
+  // Call the Claude API with prompt caching enabled.
+  // The system prompt is long and identical on every request — marking it
+  // ephemeral caches it on Anthropic's servers for ~5 minutes, cutting
+  // several seconds off every subsequent call within that window.
   const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
       'x-api-key': apiKey,
       'anthropic-version': '2023-06-01',
+      'anthropic-beta': 'prompt-caching-2024-07-31',
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-6',
       max_tokens: 8192,
-      system: systemPrompt,
+      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: messageContent }]
     })
   });
