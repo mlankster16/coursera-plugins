@@ -790,7 +790,7 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
   "static": "Full static companion text in plain prose. 2-4 paragraphs."
 }
 
-The available_types array must include the recommended type first, followed by 2-4 other types that are genuinely appropriate for this content — meaning an LX designer could reasonably choose them depending on their specific learning goal. Exclude types that do not fit this content at all. Each pedagogical_note should be specific to this content, not generic.
+The available_types array must include ALL 7 interaction types, every time — no exceptions. List the recommended type first, then the remaining 6 in any order. Every type gets a pedagogical_note that is specific to this content: for strong fits, explain why it works well; for weaker fits, explain honestly what it offers and what it sacrifices for this particular content. The LX designer sees all options and makes the final call — your job is to inform, not to gatekeep. Never omit a type because you think it doesn't fit.
 
 Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no \`\`\`json, no \`\`\` — just the object itself starting with { and ending with }.
 
