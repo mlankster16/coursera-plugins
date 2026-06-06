@@ -1,43 +1,40 @@
-// Netlify serverless function — proxies requests to the Claude API.
-// The API key is stored in Netlify's environment variables as CLAUDE_API_KEY.
-// It never appears in source code or the GitHub repo.
+// Netlify Functions v2 — streams the Anthropic SSE response directly to the
+// client so tokens arrive continuously and the connection never goes idle.
+// The API key lives in Netlify environment variables only — never in source code.
 
-exports.handler = async (event) => {
-  // Only accept POST
-  if (event.httpMethod !== 'POST') {
-    return {
-      statusCode: 405,
-      body: JSON.stringify({ error: 'Method Not Allowed' })
-    };
+export default async (req) => {
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method Not Allowed' }), {
+      status: 405,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
-  // Check the API key is configured in Netlify environment variables
   const apiKey = process.env.CLAUDE_API_KEY;
   if (!apiKey) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: 'CLAUDE_API_KEY environment variable is not set. Add it in Netlify → Site settings → Environment variables.' })
-    };
+    return new Response(
+      JSON.stringify({ error: 'CLAUDE_API_KEY environment variable is not set. Add it in Netlify → Site settings → Environment variables.' }),
+      { status: 500, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
-  // Parse the request body
   let body;
   try {
-    body = JSON.parse(event.body);
+    body = await req.json();
   } catch {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Invalid JSON in request body' })
-    };
+    return new Response(JSON.stringify({ error: 'Invalid JSON in request body' }), {
+      status: 400,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 
   const { userInput, forcedType, systemPrompt } = body;
 
   if (!userInput || !systemPrompt) {
-    return {
-      statusCode: 400,
-      body: JSON.stringify({ error: 'Missing required fields: userInput and systemPrompt' })
-    };
+    return new Response(
+      JSON.stringify({ error: 'Missing required fields: userInput and systemPrompt' }),
+      { status: 400, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
   // Build the user message — append override instruction if a type was forced
@@ -46,10 +43,10 @@ exports.handler = async (event) => {
     messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
   }
 
-  // Call the Claude API with prompt caching enabled.
-  // The system prompt is long and identical on every request — marking it
-  // ephemeral caches it on Anthropic's servers for ~5 minutes, cutting
-  // several seconds off every subsequent call within that window.
+  // Call the Claude API with streaming enabled.
+  // stream: true makes Anthropic send tokens as SSE events as they are generated.
+  // We pipe that stream directly to the client so data is always flowing —
+  // eliminating the inactivity timeout that killed non-streaming responses.
   const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -59,8 +56,9 @@ exports.handler = async (event) => {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'claude-haiku-4-5',
+      model: 'claude-sonnet-4-5',
       max_tokens: 8192,
+      stream: true,
       system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: messageContent }]
     })
@@ -68,19 +66,20 @@ exports.handler = async (event) => {
 
   if (!claudeResponse.ok) {
     const errText = await claudeResponse.text();
-    return {
-      statusCode: claudeResponse.status,
-      body: JSON.stringify({ error: `Claude API error: ${errText}` })
-    };
+    return new Response(
+      JSON.stringify({ error: `Claude API error: ${errText}` }),
+      { status: claudeResponse.status, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
-  const claudeData = await claudeResponse.json();
-  const text = claudeData.content[0].text;
-
-  // Return just the text — the client handles JSON parsing and fence stripping
-  return {
-    statusCode: 200,
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ text })
-  };
+  // Pipe the Anthropic SSE stream straight through to the browser.
+  // The client reads the events, extracts text deltas, and assembles the full
+  // JSON response once the stream ends.
+  return new Response(claudeResponse.body, {
+    headers: {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      'X-Accel-Buffering': 'no'
+    }
+  });
 };

@@ -917,8 +917,34 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         throw new Error(`API error ${response.status}: ${err}`);
       }
 
-      const data = await response.json();
-      const raw = data.text;
+      // Read the SSE stream — Anthropic sends tokens as they are generated.
+      // We accumulate text deltas here and parse the full JSON once the stream
+      // ends. The connection stays alive throughout because data is always
+      // flowing, which eliminates the Netlify inactivity timeout entirely.
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let raw = '';
+      let sseBuffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        sseBuffer += decoder.decode(value, { stream: true });
+        const lines = sseBuffer.split('\n');
+        sseBuffer = lines.pop(); // keep any incomplete line for the next chunk
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') continue;
+          try {
+            const evt = JSON.parse(payload);
+            if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+              raw += evt.delta.text;
+            }
+          } catch { /* ignore malformed SSE lines */ }
+        }
+      }
+
       const cleaned = raw
         .replace(/^```json\n?/, '')
         .replace(/^```\n?/, '')
