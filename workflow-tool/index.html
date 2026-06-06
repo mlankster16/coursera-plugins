@@ -705,8 +705,9 @@ DECISION RULES:
 - Accordion vs. click-to-reveal: use accordion when comprehension is the goal; use click-to-reveal when recall is the goal
 - When in doubt between two types, choose the one whose learning function most closely matches the stated or implied learning goal
 - For coding or technical content, assume it is conceptual — not hands-on. Use visual styling that suggests a technical context without requiring code execution.
-- If a designer asks for a live coding environment, code editor, or any interaction where learners write and run real code, this is outside the scope of this tool. Begin the rationale field with exactly "OUT OF SCOPE:" and explain why. Then generate a fully working alternative interaction using the actual content from the challenge — not a description of what the interaction would cover, but the real thing. For a coding challenge, extract the underlying concept (the algorithm, the logic, the syntax rule) and build a working inline quiz, click-to-reveal, or annotated text around that concept. The html and script fields must contain a complete, functional interaction, not placeholder text or a summary of what would be there.
-- If a challenge does not fit any available interaction type for any reason, begin the rationale with "OUT OF SCOPE:", explain why, and still generate the closest fully functional alternative using whatever relevant content can be extracted from the challenge.
+- If a designer asks for a live coding environment, code editor, or any interaction where learners write and run real code, this is outside the scope of this tool. In this case: set the "type" field to the name of the closest applicable interaction type (e.g. "Annotated text") — never put "OUT OF SCOPE:" in the type field. Begin the "rationale" field with exactly "OUT OF SCOPE:" and explain why. Then generate a fully working alternative interaction using the actual content from the challenge — not a description of what the interaction would cover, but the real thing. For a coding challenge, extract the underlying concept (the algorithm, the logic, the syntax rule) and build a working inline quiz, click-to-reveal, or annotated text around that concept. The html and script fields must contain a complete, functional interaction, not placeholder text or a summary of what would be there.
+- If a challenge does not fit any available interaction type for any reason: set the "type" field to the name of the closest applicable interaction type, begin the "rationale" field with "OUT OF SCOPE:", explain why, and still generate the closest fully functional alternative using whatever relevant content can be extracted from the challenge.
+- CRITICAL: The "type" field in both "recommendation" and "available_types" must always contain only a clean interaction type name from the list above. Never include "OUT OF SCOPE:" or any other prefix in the type field.
 
 ---
 
@@ -1111,17 +1112,28 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
     function updatePreview(result) {
       currentResult = result;
       const rawType  = result.recommendation ? result.recommendation.type : result.type;
-      const typeName = normalizeType(rawType) || rawType;
       const rationale = result.recommendation ? result.recommendation.rationale : '';
+
+      // Detect out-of-scope — Claude may put the prefix in either field
+      const typeHasPrefix     = rawType.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
+      const rationaleHasPrefix = rationale.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
+      const isOutOfScope      = typeHasPrefix || rationaleHasPrefix;
+
+      // Always display a clean type name with no "OUT OF SCOPE:" prefix
+      const cleanType = rawType.replace(/^out of scope:\s*/i, '').trim();
+      const typeName  = normalizeType(cleanType) || cleanType;
 
       // Store in session cache keyed by normalised type name
       typeCache[typeName] = result;
 
-      // Detect out-of-scope responses and surface a visible banner
-      const isOutOfScope = rationale.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
+      // Surface out-of-scope banner and set detail text
       s2OutOfScope.style.display = isOutOfScope ? 'flex' : 'none';
       if (isOutOfScope) {
-        s2OutOfScopeDetail.textContent = ' ' + rationale.replace(/^out of scope:\s*/i, '');
+        // Use whichever field carries the explanation
+        const detail = rationaleHasPrefix
+          ? rationale.replace(/^out of scope:\s*/i, '')
+          : rawType.replace(/^out of scope:\s*/i, '');
+        s2OutOfScopeDetail.textContent = ' ' + detail;
         s2RationaleText.style.display = 'none';
       } else {
         s2RationaleText.style.display = '';
