@@ -336,7 +336,8 @@
     .type-pill:hover:not(.active):not(:disabled) { border-color: var(--royal); color: var(--royal); }
     .type-pill.active { background: var(--navy); color: var(--white); border-color: var(--navy); }
     .type-pill:disabled { opacity: 0.5; cursor: not-allowed; }
-    .type-pill.cached::after { content: ''; display: inline-block; width: 6px; height: 6px; background: var(--royal); border-radius: 50%; margin-left: 6px; vertical-align: middle; }
+    .type-pill.cached { border-color: var(--royal); color: var(--royal); }
+    .type-pill.cached::after { content: '✓'; font-size: 0.7rem; margin-left: 5px; }
     .s2-pedagogy-panel { min-height: 52px; margin-top: 12px; margin-bottom: 4px; padding: 12px 14px; background: var(--whisper); border-radius: 8px; border: 0.5px solid var(--hatteras); display: none; }
     .s2-pedagogy-panel.visible { display: block; }
     .s2-pedagogy-goal { display: block; font-family: 'Montserrat', Arial, sans-serif; font-weight: 600; font-size: 0.72rem; color: var(--navy); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 5px; }
@@ -1041,7 +1042,8 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       s2PedagogyPanel.classList.add('visible');
     }
 
-    // Build type buttons dynamically from the API's available_types array
+    // Build type buttons from the initial API response — called once per analysis.
+    // Subsequent type switches only update active/cached state on existing buttons.
     function renderTypeButtons(availableTypes, recommendedType) {
       s2TypeButtonsContainer.innerHTML = '';
       s2TypeButtons = [];
@@ -1050,7 +1052,11 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
         btn.className = 'type-pill';
         btn.dataset.type = typeInfo.type;
         btn.textContent = typeInfo.type;
-        if (typeInfo.type === recommendedType) btn.classList.add('active');
+        if (typeInfo.type === recommendedType) {
+          btn.classList.add('active');
+        } else if (typeCache[typeInfo.type]) {
+          btn.classList.add('cached'); // already generated in this session
+        }
         s2TypeButtonsContainer.appendChild(btn);
         s2TypeButtons.push(btn);
 
@@ -1152,15 +1158,16 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       s2RecommendBadge.textContent = (isOutOfScope ? 'Closest alternative: ' : 'Recommended: ') + typeName;
       s2RationaleText.textContent = rationale;
 
-      // Render type buttons from available_types if present (initial load)
-      // or just update active/cached state (subsequent type switches)
-      if (result.available_types && result.available_types.length) {
+      // Build type buttons exactly once from the initial recommendation response.
+      // On all subsequent type switches, only update active/cached state — never
+      // rebuild, which would change or lose the available options.
+      if (s2TypeButtons.length === 0 && result.available_types && result.available_types.length) {
         renderTypeButtons(result.available_types, typeName);
       } else {
-        // Fallback: just update active + cached state on existing buttons
         s2TypeButtons.forEach(btn => {
-          btn.classList.toggle('active', btn.dataset.type === typeName);
-          btn.classList.toggle('cached', !!(typeCache[btn.dataset.type]) && btn.dataset.type !== typeName);
+          const isCurrent = btn.dataset.type === typeName;
+          btn.classList.toggle('active', isCurrent);
+          btn.classList.toggle('cached', !!typeCache[btn.dataset.type] && !isCurrent);
         });
       }
 
@@ -1194,6 +1201,11 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
       if (input.length < 50) return;
       currentInput = input;
       errorBox.style.display = 'none';
+      // Reset type buttons and cache so the new analysis starts clean
+      s2TypeButtons = [];
+      s2TypeButtonsContainer.innerHTML = '';
+      Object.keys(typeCache).forEach(k => delete typeCache[k]);
+      s2PedagogyPanel.classList.remove('visible');
       setStep2Substate('loading');
       showStep(2);
       try {
