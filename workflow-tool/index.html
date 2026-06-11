@@ -790,7 +790,7 @@ Respond in this exact JSON structure so the tool can parse your response reliabl
   "static": "Full static companion text in plain prose. 2-4 paragraphs."
 }
 
-The available_types array must include ALL 7 interaction types, every time — no exceptions. List the recommended type first, then the remaining 6 in any order. Every type gets a pedagogical_note that is specific to this content: for strong fits, explain why it works well; for weaker fits, explain honestly what it offers and what it sacrifices for this particular content. The LX designer sees all options and makes the final call — your job is to inform, not to gatekeep. Never omit a type because you think it doesn't fit.
+The available_types array must include ALL 7 interaction types, every time — no exceptions. List the recommended type first, then the remaining 6 in any order. Every type gets a pedagogical_note of exactly 1 sentence (20 words maximum) that is specific to this content: for strong fits, say why it works; for weaker fits, say what it sacrifices. Keep learning_goal to 4 words or fewer. Be ruthlessly concise — the notes exist to guide a quick decision, not to explain at length. Never omit a type.
 
 Do not wrap your response in markdown code fences or backticks. Return only the raw JSON object with no additional formatting, no \`\`\`json, no \`\`\` — just the object itself starting with { and ending with }.
 
@@ -944,6 +944,21 @@ CRITICAL JSON ESCAPING RULES — the response must pass JSON.parse() without mod
               raw += evt.delta.text;
             }
           } catch { /* ignore malformed SSE lines */ }
+        }
+      }
+
+      // Flush anything left in the buffer after the stream closes
+      if (sseBuffer.trim()) {
+        for (const line of sseBuffer.split('\n')) {
+          if (!line.startsWith('data: ')) continue;
+          const payload = line.slice(6).trim();
+          if (payload === '[DONE]') continue;
+          try {
+            const evt = JSON.parse(payload);
+            if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+              raw += evt.delta.text;
+            }
+          } catch { /* ignore */ }
         }
       }
 
