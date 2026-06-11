@@ -405,6 +405,7 @@ main {
 .edit-textarea:focus { border-color: var(--royal); }
 .edit-textarea--prose { font-family: 'Open Sans', Arial, sans-serif; font-size: 0.9rem; color: var(--cast-iron); background: var(--white); border-color: var(--hatteras); min-height: 140px; }
 .edit-textarea--prose:focus { border-color: var(--royal); }
+.edit-textarea:disabled { opacity: 0.6; cursor: progress; }
 
 .theme-row { display: flex; align-items: flex-start; gap: 14px; }
 .color-swatch { width: 36px; height: 36px; border-radius: 6px; border: 0.5px solid var(--hatteras); flex-shrink: 0; }

@@ -9,7 +9,7 @@
 //   mode: 'generate'  — full build call (Sonnet). Returns html/script/static
 //     for ONE type, passed as `type`.
 
-import { RECOMMEND_PROMPT, GENERATE_PROMPT } from './system-prompt.js';
+import { RECOMMEND_PROMPT, GENERATE_PROMPT, STATIC_PROMPT } from './system-prompt.js';
 
 const MODES = {
   recommend: {
@@ -21,6 +21,11 @@ const MODES = {
     prompt: GENERATE_PROMPT,
     model: 'claude-sonnet-4-5',
     maxTokens: 16384
+  },
+  static: {
+    prompt: STATIC_PROMPT,
+    model: 'claude-haiku-4-5',
+    maxTokens: 2048
   }
 };
 
@@ -50,12 +55,12 @@ export default async (req) => {
     });
   }
 
-  const { mode, userInput, type } = body;
+  const { mode, userInput, type, html } = body;
   const config = MODES[mode];
 
-  if (!config || !userInput || (mode === 'generate' && !type)) {
+  if (!config || !userInput || (mode === 'generate' && !type) || (mode === 'static' && !html)) {
     return new Response(
-      JSON.stringify({ error: 'Required: mode (recommend|generate), userInput, and type when mode is generate' }),
+      JSON.stringify({ error: 'Required: mode (recommend|generate|static), userInput; type for generate; html for static' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -63,6 +68,8 @@ export default async (req) => {
   let messageContent = userInput;
   if (mode === 'generate') {
     messageContent += `\n\n[REQUESTED TYPE: Generate this interaction as a ${type}. This choice is final — do not substitute another type.]`;
+  } else if (mode === 'static') {
+    messageContent += `\n\n[INTERACTION HTML — write the static companion text covering exactly this content:]\n${html}`;
   }
 
   const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {

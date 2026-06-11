@@ -88,12 +88,15 @@ function detectAccentColor(themeText) {
 
 // Serve a mock response matching the two-phase API shapes
 async function mockApi({ mode, type }) {
-  await new Promise(r => setTimeout(r, mode === 'recommend' ? 500 : 1200));
+  await new Promise(r => setTimeout(r, mode === 'generate' ? 1200 : 500));
   if (mode === 'recommend') return JSON.parse(JSON.stringify(MOCK_RECOMMEND));
   const key = Object.keys(MOCK_RESPONSES).find(k => k.toLowerCase() === String(type).toLowerCase());
+  if (mode === 'static') {
+    return { static: key ? MOCK_RESPONSES[key].static : 'Mock static companion text for ' + type + '.' };
+  }
   if (key) {
     const m = MOCK_RESPONSES[key];
-    return { type: key, rationale: m.recommendation.rationale, visual_theme: m.visual_theme, json: m.json, static: m.static };
+    return { type: key, rationale: m.recommendation.rationale, visual_theme: m.visual_theme, json: m.json };
   }
   return {
     type,
@@ -224,6 +227,25 @@ function fetchGeneration(type) {
       .finally(() => { delete typePromises[type]; });
   }
   return typePromises[type];
+}
+
+// Static companion text is generated lazily — only when the designer confirms
+// a type — so previews and background pre-generation never pay for it.
+const staticCache = {};     // type name -> static text
+const staticPromises = {};  // type name -> in-flight promise (dedupe)
+
+function fetchStatic(type) {
+  if (staticCache[type]) return Promise.resolve(staticCache[type]);
+  if (!staticPromises[type]) {
+    const gen = typeCache[type];
+    staticPromises[type] = callApi({ mode: 'static', userInput: currentInput, type, html: gen.json.html })
+      .then(result => {
+        staticCache[type] = result.static;
+        return result.static;
+      })
+      .finally(() => { delete staticPromises[type]; });
+  }
+  return staticPromises[type];
 }
 
 const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3'), 4: document.getElementById('step-4') };
@@ -472,6 +494,8 @@ analyzeBtn.addEventListener('click', async () => {
   s2TypeButtonsContainer.innerHTML = '';
   Object.keys(typeCache).forEach(k => delete typeCache[k]);
   Object.keys(typePromises).forEach(k => delete typePromises[k]);
+  Object.keys(staticCache).forEach(k => delete staticCache[k]);
+  Object.keys(staticPromises).forEach(k => delete staticPromises[k]);
   recommendationData = null;
   currentType = null;
   viewToken++;
@@ -509,7 +533,9 @@ analyzeBtn.addEventListener('click', async () => {
   }
 });
 
-s2ConfirmBtn.addEventListener('click', () => {
+let confirmToken = 0; // guards the async static fill if the user re-confirms
+
+s2ConfirmBtn.addEventListener('click', async () => {
   const gen = currentType ? typeCache[currentType] : null;
   if (!gen) return; // nothing generated yet
   confirmedResult = {
@@ -518,14 +544,40 @@ s2ConfirmBtn.addEventListener('click', () => {
       rationale: gen.rationale || (recommendationData ? recommendationData.recommendation.rationale : '')
     },
     visual_theme: gen.visual_theme,
-    json: gen.json,
-    static: gen.static
+    json: gen.json
   };
   // Populate the edit textareas with the generated content
   editHtml.value   = gen.json.html;
   editScript.value = gen.json.script;
-  editStatic.value = gen.static;
   showStep(3);
+
+  // Static companion text is generated on demand, right now — the designer
+  // can edit HTML/JS while it writes. Output stays disabled until it lands.
+  const token = ++confirmToken;
+  if (staticCache[currentType]) {
+    editStatic.value = staticCache[currentType];
+    editStatic.disabled = false;
+    s3GenerateBtn.disabled = false;
+    return;
+  }
+  editStatic.value = '';
+  editStatic.placeholder = 'Writing the static companion text...';
+  editStatic.disabled = true;
+  s3GenerateBtn.disabled = true;
+  try {
+    const text = await fetchStatic(currentType);
+    if (token !== confirmToken) return; // user went back and confirmed another type
+    editStatic.value = text;
+  } catch (err) {
+    if (token !== confirmToken) return;
+    editStatic.value = '';
+    editStatic.placeholder = 'The static text could not be generated — you can write it here yourself, or go back and confirm again to retry.';
+  } finally {
+    if (token === confirmToken) {
+      editStatic.disabled = false;
+      s3GenerateBtn.disabled = false;
+    }
+  }
 });
 
 s2StartOver.addEventListener('click', (e) => {

@@ -101,11 +101,14 @@ const IMPLEMENTATION_RULES = `IMPLEMENTATION REQUIREMENTS — these are the diff
 UNIVERSAL RULE — pre-rendered HTML, listener-only JavaScript:
 Render ALL content elements directly in the HTML string: every tab, every panel, every card, every quiz option, every draggable item, every annotation. JavaScript must NEVER create, build, or inject content elements — no createElement, no innerHTML assignment, no appendChild for content. The script's only jobs are attaching event listeners and toggling visibility, classes, or attributes on elements that already exist in the HTML. Interactions built this way cannot fail to render; interactions that build their content in JS frequently render as an empty box.
 
+UNIVERSAL RULE — selector integrity:
+Every id, class, and data attribute the script references must exist VERBATIM in the html field. Before finishing, mentally trace each getElementById and querySelector call in the script and confirm the html contains that exact id or class. A selector mismatch is the most common cause of an interaction that renders but does not respond to clicks.
+
 Tabbed explorer:
 (1) All tab buttons AND all panels pre-rendered in the HTML string. (2) The first panel visible (style="display:block"), all others hidden (style="display:none"). (3) Tab buttons carry aria-selected and a data attribute linking them to their panel id. (4) JS attaches one click listener per tab that toggles panel display and active-tab styling. Nothing else.
 
 Inline quiz:
-All options pre-rendered as buttons in the HTML, feedback element pre-rendered but hidden. JS attaches click listeners that reveal feedback and apply correct/incorrect styling.
+(1) All options pre-rendered as <button type="button"> elements in the HTML, each carrying data-correct="true" or data-correct="false" and a data-feedback attribute with that option's explanation. (2) A feedback element pre-rendered but hidden (style="display:none"), with an id. (3) JS selects the option buttons with a container-scoped querySelectorAll on a class that exists in the html, then attaches one click listener per button that: marks the question answered (ignore further clicks), styles the clicked option as correct or incorrect from its data-correct value, and populates + shows the feedback element from the clicked option's data-feedback. (4) Verify the class names and ids used in querySelectorAll/getElementById appear character-for-character in the html.
 
 Click-to-reveal:
 All cards with both their front (prompt) and back (answer) content pre-rendered, backs hidden. JS toggles visibility on click.
@@ -113,8 +116,8 @@ All cards with both their front (prompt) and back (answer) content pre-rendered,
 Annotated text:
 The passage with all highlight spans and all annotation content pre-rendered, annotations hidden. JS toggles annotation visibility when a highlight is clicked.
 
-Sequencing:
-(1) Render ALL draggable items directly in the HTML string in a shuffled order. (2) Each item must have draggable="true" and a data-correct attribute with its correct 1-based position. (3) Declare a module-level variable: var dragSrc = null — never use dataTransfer.setData/getData. (4) dragstart listener: dragSrc = this. (5) dragover listener: e.preventDefault() MUST be called — without it the browser blocks the drop entirely and items snap back. (6) drop listener: swap textContent and data-correct between dragSrc and the drop target, then set dragSrc = null. (7) Include a "Check order" button that reads each item's current data-correct value and shows per-item correct/incorrect feedback.
+Sequencing — use a pool-and-slots layout, NOT item-swapping:
+(1) Layout is two columns side by side: the left column is a "Steps" pool containing all items pre-rendered in shuffled order; the right column is a "Your order" target containing the same number of pre-rendered EMPTY slots labeled 1, 2, 3... (the slot labels are position numbers, which is fine — they say where an item will go, not which item is correct). (2) Each pool item has draggable="true" and a data-correct attribute holding its correct 1-based position. NEVER display the data-correct value or any other hint of the correct order anywhere in the visible UI — no numbers, letters, or ordering cues on the items themselves, and the shuffled pool must not accidentally appear in correct order. (3) Each slot has a data-slot attribute (1-based) and generous empty height with a dashed border so it reads as a drop target. (4) Declare a module-level variable: var dragSrc = null — never use dataTransfer.setData/getData. dragstart on items sets dragSrc = this. (5) BOTH the slots AND the pool container must have dragover listeners that call e.preventDefault() — without it the browser blocks the drop and items snap back. (6) drop on a slot: if the slot already holds an item, move that item back to the pool first; then appendChild(dragSrc) into the slot. drop on the pool: appendChild(dragSrc) back into the pool. This moves elements rather than swapping text — far more forgiving to use. (7) Also make each pool item clickable as a fallback: clicking an item places it into the first empty slot; clicking an item already in a slot returns it to the pool. (8) Include a "Check order" button that, for each slot, compares its item's data-correct to the slot's data-slot and shows per-slot correct/incorrect feedback; slots without an item count as incorrect.
 
 Drag-to-classify:
 (1) All items and all drop zones pre-rendered in the HTML. (2) Store the dragged element in a module-level variable, never use dataTransfer.setData/getData. (3) The dragover listener on every drop zone MUST call e.preventDefault() — without it no drop will ever fire. (4) Drop zones accept dragged items and confirm placement visually. (5) Include a "Check answers" button with per-item feedback.
@@ -184,9 +187,8 @@ export const GENERATE_PROMPT = `${PERSONA}
 The designer has described a content challenge, and an interaction type has already been chosen. Your job in THIS call is to generate the complete, ready-to-use interaction of the REQUESTED TYPE specified in the message:
 1. Select the highest-value subset of the content for this interaction type
 2. Generate a complete, ready-to-use Coursera plugin JSON configuration
-3. Generate a static companion text that covers the same content accessibly
 
-Always generate the requested type — even if another type might fit better. The designer has made their choice.
+Always generate the requested type — even if another type might fit better. The designer has made their choice. Do NOT generate static companion text in this call — that happens separately.
 
 ---
 
@@ -216,11 +218,30 @@ Respond in this exact JSON structure. No text before or after — only the JSON 
   "json": {
     "html": "complete self-contained HTML and CSS string with Duke brand applied",
     "script": "complete JavaScript string using addEventListener only, no inline handlers"
-  },
-  "static": "Full static companion text in plain prose. 2-4 paragraphs."
+  }
 }
 
 The html and script fields must contain a complete, functional interaction — never placeholder text or a summary of what would be there.
+
+You must ALWAYS respond in this exact JSON structure — never plain text, never conversational, never a refusal.
+
+${JSON_RULES}`;
+
+export const STATIC_PROMPT = `${PERSONA}
+
+A designer has built an interactive component for a Coursera reading page. Your job in THIS call is to write the static companion text for it — a plain-prose version of the interaction's content for accessibility and screen readers. The message contains the designer's original challenge and the interaction's HTML.
+
+Requirements:
+- Cover 100% of the content that appears in the interaction, in plain prose
+- 2-4 paragraphs, no headings, no lists, no markup
+- Written for a learner reading it in place of the interaction — never describe the interaction ("click the tabs to...") or mention that it is an alternative
+
+OUTPUT FORMAT:
+Respond in this exact JSON structure. No text before or after — only the JSON object.
+
+{
+  "static": "Full static companion text in plain prose. 2-4 paragraphs separated by \\\\n\\\\n."
+}
 
 You must ALWAYS respond in this exact JSON structure — never plain text, never conversational, never a refusal.
 
