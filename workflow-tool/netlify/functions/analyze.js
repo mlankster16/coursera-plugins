@@ -1,9 +1,28 @@
 // Netlify Functions v2 — streams the Anthropic SSE response directly to the
 // client so tokens arrive continuously and the connection never goes idle.
 // The API key lives in Netlify environment variables only — never in source code.
-// The system prompt lives server-side in system-prompt.js — the client never sends it.
+// System prompts live server-side in system-prompt.js — the client never sends them.
+//
+// Two-phase flow:
+//   mode: 'recommend' — fast analysis call (Haiku). Returns recommendation +
+//     pedagogical notes for all types. Small response, ~2-4s.
+//   mode: 'generate'  — full build call (Sonnet). Returns html/script/static
+//     for ONE type, passed as `type`.
 
-import { SYSTEM_PROMPT } from './system-prompt.js';
+import { RECOMMEND_PROMPT, GENERATE_PROMPT } from './system-prompt.js';
+
+const MODES = {
+  recommend: {
+    prompt: RECOMMEND_PROMPT,
+    model: 'claude-haiku-4-5',
+    maxTokens: 2048
+  },
+  generate: {
+    prompt: GENERATE_PROMPT,
+    model: 'claude-sonnet-4-5',
+    maxTokens: 16384
+  }
+};
 
 export default async (req) => {
   if (req.method !== 'POST') {
@@ -31,25 +50,21 @@ export default async (req) => {
     });
   }
 
-  const { userInput, forcedType } = body;
+  const { mode, userInput, type } = body;
+  const config = MODES[mode];
 
-  if (!userInput) {
+  if (!config || !userInput || (mode === 'generate' && !type)) {
     return new Response(
-      JSON.stringify({ error: 'Missing required field: userInput' }),
+      JSON.stringify({ error: 'Required: mode (recommend|generate), userInput, and type when mode is generate' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
 
-  // Build the user message — append override instruction if a type was forced
   let messageContent = userInput;
-  if (forcedType) {
-    messageContent += `\n\n[OVERRIDE: Generate this interaction as a ${forcedType} type. Keep all the same content but restructure it for this interaction format.]`;
+  if (mode === 'generate') {
+    messageContent += `\n\n[REQUESTED TYPE: Generate this interaction as a ${type}. This choice is final — do not substitute another type.]`;
   }
 
-  // Call the Claude API with streaming enabled.
-  // stream: true makes Anthropic send tokens as SSE events as they are generated.
-  // We pipe that stream directly to the client so data is always flowing —
-  // eliminating the inactivity timeout that killed non-streaming responses.
   const claudeResponse = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -59,10 +74,10 @@ export default async (req) => {
       'content-type': 'application/json'
     },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 16384,
+      model: config.model,
+      max_tokens: config.maxTokens,
       stream: true,
-      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: config.prompt, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: messageContent }]
     })
   });
@@ -76,8 +91,6 @@ export default async (req) => {
   }
 
   // Pipe the Anthropic SSE stream straight through to the browser.
-  // The client reads the events, extracts text deltas, and assembles the full
-  // JSON response once the stream ends.
   return new Response(claudeResponse.body, {
     headers: {
       'Content-Type': 'text/event-stream',

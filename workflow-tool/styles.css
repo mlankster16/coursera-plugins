@@ -355,7 +355,8 @@ main {
   text-align: center;
 }
 
-.s2-confirm-btn:hover { background: var(--royal); }
+.s2-confirm-btn:hover:not(:disabled) { background: var(--royal); }
+.s2-confirm-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 .s2-confirm-btn:focus-visible { outline: 3px solid var(--persimmon); outline-offset: 3px; }
 
 .back-link {

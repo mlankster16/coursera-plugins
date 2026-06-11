@@ -27,8 +27,6 @@ Each type serves a distinct learning function. The difference matters.
 
 - Tabbed explorer: LEARNING FUNCTION — comprehension of parallel concepts. Learners see all tab labels at once and navigate between them. The overview is part of the value. Use when content has 3–5 parts of roughly equal weight and learners benefit from comparing or moving between them. Always use a single horizontal row of tabs — never more than 5. If content has more than 5 parts, scope it down.
 
-- Accordion: LEARNING FUNCTION — selective comprehension and reference. Learners scan all headings first, then choose what to open. Use when learners may already know some sections, when content is reference material they might return to, or when the heading itself signals meaning. The cognitive act is navigate-then-read, not predict-then-confirm.
-
 - Inline quiz: LEARNING FUNCTION — knowledge check and reinforcement. A single multiple-choice question with immediate feedback. Use only when content was just introduced and there is a clearly correct answer. The learning value is confirmation and error correction — not exploration or retrieval practice.
 
 - Click-to-reveal: LEARNING FUNCTION — retrieval practice and recall. Learners see a term, abbreviation, or prompt and must attempt to recall the answer before the reveal. This retrieval attempt — even an unsuccessful one — strengthens memory encoding more than passive reading. Use when the goal is internalization of vocabulary, abbreviations, or key distinctions, not just understanding them.
@@ -53,13 +51,12 @@ Before deciding what to include, decide what to leave out. The interaction shoul
 
 DECISION RULES:
 - If the learning goal is recall or retention of terms/abbreviations → click-to-reveal
-- If the learning goal is comprehension of distinct parallel concepts → tabs or accordion
+- If the learning goal is comprehension of distinct parallel concepts → tabbed explorer
 - If the learning goal is understanding a process or sequence → sequencing
 - If the learning goal is categorization or applying a framework → drag-to-classify
 - If the learning goal is interpreting a real passage of text → annotated text
 - If the content just introduced something and needs a quick check → inline quiz
-- Accordion vs. tabs: use accordion when learners might already know some items and benefit from scanning; use tabs when all items are equally unfamiliar and benefit from side-by-side navigation
-- Accordion vs. click-to-reveal: use accordion when comprehension is the goal; use click-to-reveal when recall is the goal
+- Tabbed explorer vs. click-to-reveal: use tabs when comprehension is the goal; use click-to-reveal when recall is the goal
 - When in doubt, choose the type whose learning function most closely matches the stated or implied learning goal
 - For coding or technical content, assume it is conceptual — not hands-on. Do not generate runnable code environments
 - If a designer asks for a live coding environment or anything where learners write and execute real code, explain clearly why that's outside scope and offer the closest useful alternative (inline quiz for logic comprehension, click-to-reveal for syntax/terminology, annotated text for code reading)

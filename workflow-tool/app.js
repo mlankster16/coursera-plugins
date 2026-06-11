@@ -5,25 +5,23 @@
 // it never appears in this file or in the browser.
 const USE_MOCK_API = false;
 
-const MOCK_RESPONSES = {
-  "Accordion": {
-    "type": "Accordion",
-    "recommendation": {
-      "type": "Accordion",
-      "rationale": "This content introduces five distinct nursing assessment frameworks that learners may encounter unevenly — some will already know SBAR, others will not. The accordion format lets learners scan all five terms at once and choose which to read in depth, respecting prior knowledge and reducing cognitive load. Because each framework is a discrete named concept with a structured explanation, the glossary-style accordion is the clearest match."
-    },
-    "available_types": [
-      { "type": "Accordion", "learning_goal": "Selective comprehension and reference", "pedagogical_note": "Learners see all five framework names at once before opening any. This overview supports scanning — learners can skip what they already know and focus on what they don't. Best when prior knowledge is uneven across the group." },
-      { "type": "Click-to-reveal", "learning_goal": "Recall and retrieval practice", "pedagogical_note": "If the goal shifts from comprehension to memorization, click-to-reveal prompts learners to retrieve each full framework name from the abbreviation before confirming. The retrieval attempt — even an unsuccessful one — strengthens long-term retention more than reading." },
-      { "type": "Tabbed explorer", "learning_goal": "Parallel navigation and comparison", "pedagogical_note": "If learners need to compare frameworks side-by-side or navigate between their details repeatedly, tabs give each framework its own persistent panel. Best when all frameworks are equally unfamiliar and the internal structure of each (full name, when to use, key steps) benefits from a dedicated layout." }
-    ],
-    "visual_theme": "Clinical EHR aesthetic using Eno green (#339898) as the accent color, Roboto Mono for framework abbreviations to suggest clinical documentation, and structured row layouts that reference the visual language of electronic health record interfaces.",
-    "json": {
-      "html": "<div style=\"font-family: 'Open Sans', Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"font-family: 'Montserrat', Arial, sans-serif; color: #012169; font-size: 1.25rem; margin-bottom: 16px;\">Nursing Assessment Frameworks</h2><div id=\"accordion-container\"></div></div>",
-      "script": "(function(){ function init(){ var frameworks = [{term:'SBAR',def:'Situation, Background, Assessment, Recommendation — a structured communication tool used during patient handoffs.'},{term:'HEAD-TO-TOE',def:'A systematic physical assessment approach moving from neurological status down through all body systems.'},{term:'OLDCARTS',def:'Onset, Location, Duration, Character, Alleviating factors, Relieving factors, Timing, Severity — used for symptom analysis.'},{term:'ABCDE',def:'Airway, Breathing, Circulation, Disability, Exposure — the primary survey framework for rapid patient assessment.'},{term:'CIWA-Ar',def:'Clinical Institute Withdrawal Assessment for Alcohol — a validated scale for monitoring and managing alcohol withdrawal symptoms.'}]; var container = document.getElementById('accordion-container'); frameworks.forEach(function(f){ var item = document.createElement('div'); item.style.cssText = 'border: 0.5px solid #E2E6ED; border-radius: 8px; margin-bottom: 8px; overflow: hidden; background: white;'; var btn = document.createElement('button'); btn.setAttribute('aria-expanded','false'); btn.style.cssText = 'width:100%;text-align:left;padding:14px 16px;background:white;border:none;cursor:pointer;font-family:Roboto Mono,Courier New,monospace;font-size:0.95rem;color:#012169;display:flex;justify-content:space-between;align-items:center;'; btn.innerHTML = f.term + '<span style=\"color:#339898;font-size:1.2rem;\">+</span>'; var panel = document.createElement('div'); panel.style.cssText = 'display:none;padding:14px 16px;font-size:0.9rem;color:#262626;border-top:0.5px solid #E2E6ED;line-height:1.6;'; panel.textContent = f.def; btn.addEventListener('click',function(){ var open = btn.getAttribute('aria-expanded')==='true'; btn.setAttribute('aria-expanded',String(!open)); panel.style.display = open?'none':'block'; btn.querySelector('span').textContent = open?'+':'-'; }); item.appendChild(btn); item.appendChild(panel); container.appendChild(item); }); } if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',init);}else{init();} })()"
-    },
-    "static": "Nursing practice relies on a set of standardized assessment frameworks that bring consistency and clarity to clinical documentation and communication. These frameworks are not interchangeable — each serves a distinct purpose and is applied in different clinical contexts, so nurses must understand when and why to use each one.\n\nSBAR (Situation, Background, Assessment, Recommendation) is the most widely used handoff communication tool in acute care settings. It gives nurses a predictable structure for reporting patient status changes to physicians or during shift transitions. HEAD-TO-TOE assessment is a systematic physical examination sequence that ensures no body system is overlooked during routine assessments.\n\nOLDCARTS guides symptom analysis by capturing the full character of a patient complaint — when it started, where it is, how long it lasts, what it feels like, and what makes it better or worse. ABCDE (Airway, Breathing, Circulation, Disability, Exposure) is the rapid primary survey framework used in emergency and deterioration scenarios. Finally, CIWA-Ar is a validated clinical instrument specifically for monitoring patients at risk of alcohol withdrawal, with scored items that guide medication decisions.\n\nTogether, these frameworks form the structural backbone of nursing assessment. Familiarity with all five — and clarity about when each applies — is foundational to safe, communicative practice."
+// Mock recommendation response — mirrors the two-phase API's 'recommend' shape
+const MOCK_RECOMMEND = {
+  "recommendation": {
+    "type": "Tabbed Explorer",
+    "rationale": "Five discrete frameworks of equal conceptual weight map naturally to tabs, giving learners side-by-side navigation that supports comparison. Tabs keep all options persistently visible while learners read one framework at a time."
   },
+  "available_types": [
+    { "type": "Tabbed Explorer", "learning_goal": "Parallel comprehension", "pedagogical_note": "All framework names stay visible while learners compare one at a time — the strongest fit for parallel concepts." },
+    { "type": "Click-to-Reveal", "learning_goal": "Recall and retrieval", "pedagogical_note": "Prompts learners to retrieve each framework from its abbreviation — better for memorization than comprehension." },
+    { "type": "Drag-to-Classify", "learning_goal": "Schema building", "pedagogical_note": "Sorting scenarios by framework builds application skill, but requires clear category boundaries." },
+    { "type": "Sequencing", "learning_goal": "Procedural understanding", "pedagogical_note": "Only fits if step order within one framework is the goal — weaker for comparing five frameworks." },
+    { "type": "Inline Quiz", "learning_goal": "Knowledge check", "pedagogical_note": "One scenario question checks application but covers only a sliver of the content." },
+    { "type": "Annotated Text", "learning_goal": "Guided close reading", "pedagogical_note": "Works only if a real clinical passage is the learning object — none was provided here." }
+  ]
+};
+
+const MOCK_RESPONSES = {
   "Tabbed Explorer": {
     "type": "Tabbed Explorer",
     "recommendation": {
@@ -63,19 +61,6 @@ const MOCK_RESPONSES = {
     },
     "static": "In clinical settings, nursing assessment frameworks are almost always referred to by their abbreviations. A nurse says 'I used SBAR' or 'I ran through ABCDE' — the full names are rarely spoken aloud. This creates a specific learning challenge: students must internalize both the abbreviation and the full conceptual structure it represents.\n\nClick-to-reveal cards address this directly. By showing only the abbreviation first, the format prompts learners to actively retrieve what they know before the answer is confirmed. This retrieval attempt — even when unsuccessful — strengthens the memory trace more effectively than reading a list of definitions.\n\nEach card in this set represents one framework. SBAR and ABCDE are the two most likely to be encountered early in clinical rotations, and most students will have some exposure to them. OLDCARTS and HEAD-TO-TOE are framework names that are less universally known before clinical placement. CIWA-Ar is the most specialized and is typically introduced in the context of medical-surgical or detox unit content.\n\nAfter working through all five cards, learners should be able to state the full name behind each abbreviation and identify the clinical context in which it is applied — the foundational level of framework knowledge required before applying them in simulated or real patient encounters."
   },
-  "Image Hotspot": {
-    "type": "Image Hotspot",
-    "recommendation": {
-      "type": "Image Hotspot",
-      "rationale": "A hotspot interaction creates an active spatial mapping experience, inviting learners to connect each assessment framework to a visual anchor rather than reading a linear list. Mapping frameworks to zones of a body figure reinforces the logic of HEAD-TO-TOE and ABCDE as spatially grounded assessments while distinguishing SBAR, OLDCARTS, and CIWA-Ar as frameworks tied to communication and symptom analysis rather than anatomy. The interaction rewards curiosity-driven exploration and supports learners who process information visually."
-    },
-    "visual_theme": "Eno clinical green (#339898) for hotspot markers and active zone highlights against a clean white SVG body figure on a Hatteras (#E2E6ED) background, with Duke Navy (#012169) for tooltip headers — evoking the clean annotated diagrams found in clinical reference materials and anatomy atlases.",
-    "json": {
-      "html": "<div style=\"font-family: Arial, sans-serif; max-width: 720px; margin: 0 auto; padding: 24px; background: #F3F2F1;\"><h2 style=\"color: #012169; font-size: 1.15rem; margin-bottom: 6px;\">Assessment Framework Map</h2><p style=\"color: #555; font-size: 0.88rem; margin-bottom: 16px;\">Click a hotspot on the diagram to learn about each assessment framework.</p><div style=\"position: relative; display: inline-block; width: 100%; max-width: 680px;\" id=\"hotspot-container\"><svg viewBox=\"0 0 680 500\" xmlns=\"http://www.w3.org/2000/svg\" style=\"width:100%;background:#E2E6ED;border-radius:12px;display:block;\"><!-- Background --><rect width=\"680\" height=\"500\" fill=\"#E2E6ED\" rx=\"12\"/><!-- Body figure --><ellipse cx=\"340\" cy=\"80\" rx=\"38\" ry=\"44\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Neck --><rect x=\"328\" y=\"120\" width=\"24\" height=\"20\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Torso --><path d=\"M290 140 Q270 160 272 240 L272 320 Q272 330 340 330 Q408 330 408 320 L408 240 Q410 160 390 140 Z\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Left arm --><path d=\"M290 155 Q260 170 250 260 Q248 275 255 280 Q265 285 270 275 Q278 235 295 200\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Right arm --><path d=\"M390 155 Q420 170 430 260 Q432 275 425 280 Q415 285 410 275 Q402 235 385 200\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Left leg --><path d=\"M300 325 Q295 370 295 430 Q295 445 308 445 Q320 445 322 430 Q325 385 330 335\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Right leg --><path d=\"M380 325 Q385 370 385 430 Q385 445 372 445 Q360 445 358 430 Q355 385 350 335\" fill=\"white\" stroke=\"#012169\" stroke-width=\"2\"/><!-- Labels for zones --><text x=\"510\" y=\"85\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone A: Head</text><text x=\"510\" y=\"185\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone B: Chest</text><text x=\"510\" y=\"285\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone C: Abdomen</text><text x=\"510\" y=\"340\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone D: Upper body</text><text x=\"510\" y=\"420\" font-size=\"12\" fill=\"#555\" font-family=\"Arial, sans-serif\">Zone E: Lower body</text><!-- Connector lines --><line x1=\"378\" y1=\"80\" x2=\"505\" y2=\"82\" stroke=\"#339898\" stroke-width=\"1\" stroke-dasharray=\"4 3\"/><!-- Hotspot A: Head - ABCDE --><circle id=\"hs-a\" cx=\"340\" cy=\"80\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"85\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">A</text><!-- Hotspot B: Chest - SBAR --><circle id=\"hs-b\" cx=\"340\" cy=\"185\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"190\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">B</text><!-- Hotspot C: Abdomen - OLDCARTS --><circle id=\"hs-c\" cx=\"340\" cy=\"280\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"285\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">C</text><!-- Hotspot D: Upper limbs - HEAD-TO-TOE --><circle id=\"hs-d\" cx=\"255\" cy=\"230\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"255\" y=\"235\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">D</text><!-- Hotspot E: Lower limbs - CIWA-Ar --><circle id=\"hs-e\" cx=\"340\" cy=\"420\" r=\"16\" fill=\"#339898\" opacity=\"0.85\" style=\"cursor:pointer;\"/><text x=\"340\" y=\"425\" text-anchor=\"middle\" font-size=\"13\" font-weight=\"bold\" fill=\"white\" font-family=\"Arial, sans-serif\" style=\"pointer-events:none;\">E</text></svg><div id=\"hs-tooltip\" style=\"display:none; position:absolute; top:10px; right:10px; width:220px; background:white; border:2px solid #339898; border-radius:8px; padding:14px; box-shadow: 0 2px 10px rgba(0,0,0,0.12);\"><button id=\"hs-close\" style=\"position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:1rem;color:#555;line-height:1;\">x</button><div id=\"hs-title\" style=\"font-size:0.78rem;font-weight:bold;color:#339898;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:4px;\"></div><div id=\"hs-name\" style=\"font-size:0.95rem;font-weight:bold;color:#012169;margin-bottom:8px;line-height:1.3;\"></div><div id=\"hs-body\" style=\"font-size:0.83rem;color:#262626;line-height:1.55;\"></div></div></div></div>",
-      "script": "var hotspotData = {a:{abbr:'ABCDE',name:'Airway, Breathing, Circulation, Disability, Exposure',body:'Used in acute deterioration and emergencies. Starts with the airway — the fastest threat to life — and systematically works through breathing, circulation, neurological status, and full body exposure. Applied before any other detailed assessment in an unstable patient.'},b:{abbr:'SBAR',name:'Situation, Background, Assessment, Recommendation',body:'A communication framework, not a physical assessment tool. Used when calling a physician or handing off care. Ensures critical information is conveyed in a predictable structure: what is happening, relevant history, your clinical interpretation, and what you are asking for.'},c:{abbr:'OLDCARTS',name:'Onset, Location, Duration, Character, Alleviating/Relieving factors, Timing, Severity',body:'Used to fully characterize a symptom during the patient interview. Each element captures a different dimension of the complaint. Particularly useful when a patient presents with pain, discomfort, or any symptom requiring a structured history before clinical decision-making.'},d:{abbr:'HEAD-TO-TOE',name:'Head-to-Toe Assessment',body:'A comprehensive sequential physical assessment starting at the head and progressing downward through all body systems. Used on admission and during routine shift assessments to ensure no system is overlooked. Documents baseline status and identifies changes over time.'},e:{abbr:'CIWA-Ar',name:'Clinical Institute Withdrawal Assessment for Alcohol, Revised',body:'A validated scoring tool for monitoring alcohol withdrawal. Items include tremor, sweating, anxiety, agitation, perceptual disturbances, and orientation. A total score guides decisions about medication administration. Typically repeated every 1-4 hours in at-risk patients.'}}; var tooltip = document.getElementById('hs-tooltip'); var title = document.getElementById('hs-title'); var name = document.getElementById('hs-name'); var body = document.getElementById('hs-body'); function showTip(key) { var d = hotspotData[key]; title.textContent = d.abbr; name.textContent = d.name; body.textContent = d.body; tooltip.style.display = 'block'; } ['a','b','c','d','e'].forEach(function(k) { var el = document.getElementById('hs-' + k); if (el) { el.addEventListener('click', function() { showTip(k); }); } }); document.getElementById('hs-close').addEventListener('click', function() { tooltip.style.display = 'none'; });"
-    },
-    "static": "Clinical assessment frameworks can be understood as applying to different domains of nursing practice: some map to the physical body, some to clinical communication, and some to structured symptom analysis. This visual mapping makes those distinctions tangible rather than abstract.\n\nABCDE is the most spatially immediate framework — it literally moves through physiological systems in the order most critical to survival, beginning with airway and ending with full-body exposure. HEAD-TO-TOE is similarly body-anchored, progressing from neurological assessment at the head through every system to the extremities. Both frameworks have an inherent spatial logic that a body diagram can reinforce.\n\nSBAR and OLDCARTS have no direct anatomical anchor — SBAR structures communication between clinicians, and OLDCARTS structures the nurse's conversation with the patient about a symptom. Mapping them to a body figure makes the point that they are applied in the context of a patient encounter but are not themselves physical assessment sequences.\n\nCIWA-Ar occupies a middle ground: it involves observing physical signs (tremor, diaphoresis, agitation) and asking the patient questions, but its output is a numerical score rather than a body-system documentation. Treating it as a distinct category in a visual framework helps learners understand that validated scoring tools are a different kind of clinical instrument from open-ended assessment frameworks."
-  },
   "Sequencing": {
     "type": "Sequencing",
     "recommendation": { "type": "Sequencing", "rationale": "Mock sequencing response for sample content." },
@@ -101,20 +86,39 @@ function detectAccentColor(themeText) {
   return '#E89923';
 }
 
-async function callClaude(userInput, forcedType) {
-  if (USE_MOCK_API) {
-    await new Promise(r => setTimeout(r, 800));
-    if (forcedType && MOCK_RESPONSES[forcedType]) return MOCK_RESPONSES[forcedType];
-    return MOCK_RESPONSES['Accordion'];
+// Serve a mock response matching the two-phase API shapes
+async function mockApi({ mode, type }) {
+  await new Promise(r => setTimeout(r, mode === 'recommend' ? 500 : 1200));
+  if (mode === 'recommend') return JSON.parse(JSON.stringify(MOCK_RECOMMEND));
+  const key = Object.keys(MOCK_RESPONSES).find(k => k.toLowerCase() === String(type).toLowerCase());
+  if (key) {
+    const m = MOCK_RESPONSES[key];
+    return { type: key, rationale: m.recommendation.rationale, visual_theme: m.visual_theme, json: m.json, static: m.static };
   }
+  return {
+    type,
+    rationale: 'Mock placeholder for ' + type + '.',
+    visual_theme: 'Duke Navy on Whisper Gray placeholder theme.',
+    json: {
+      html: '<div style="font-family:\'Open Sans\',Arial,sans-serif;padding:24px;background:#F3F2F1;color:#012169;font-weight:600;">' + type + ' — mock placeholder</div>',
+      script: '(function(){ function init(){} if(document.readyState===\'loading\'){document.addEventListener(\'DOMContentLoaded\',init);}else{init();} })()'
+    },
+    static: 'Mock static companion text for ' + type + '.'
+  };
+}
 
-  // Call Claude via the Netlify serverless function.
-  // The API key lives in Netlify's environment variables — never in
-  // the browser or this file. No credentials needed on the client side.
+// Call the Netlify serverless function. payload is either
+//   { mode: 'recommend', userInput }                — fast analysis (Haiku)
+//   { mode: 'generate',  userInput, type }          — full build (Sonnet)
+// The API key lives in Netlify's environment variables — never in
+// the browser or this file. No credentials needed on the client side.
+async function callApi(payload) {
+  if (USE_MOCK_API) return mockApi(payload);
+
   const response = await fetch('/.netlify/functions/analyze', {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ userInput, forcedType })
+    body: JSON.stringify(payload)
   });
 
   if (!response.ok) {
@@ -199,9 +203,28 @@ async function callClaude(userInput, forcedType) {
 }
 
 let currentInput = '';
-let currentResult = null;
+let recommendationData = null;  // { recommendation, available_types } from the recommend call
+let currentType = null;         // canonical name of the type currently shown in the preview
 let confirmedResult = null;
-const typeCache = {};   // stores results keyed by type name for this session
+let viewToken = 0;              // guards against stale async preview updates
+const typeCache = {};           // type name -> generation result for this session
+const typePromises = {};        // type name -> in-flight generation promise (dedupe)
+
+// Fetch (or reuse) the generated interaction for a type. Background
+// pre-generation and pill clicks share this — a type is never generated twice.
+function fetchGeneration(type) {
+  if (typeCache[type]) return Promise.resolve(typeCache[type]);
+  if (!typePromises[type]) {
+    typePromises[type] = callApi({ mode: 'generate', userInput: currentInput, type })
+      .then(result => {
+        typeCache[type] = result;
+        markCached(type);
+        return result;
+      })
+      .finally(() => { delete typePromises[type]; });
+  }
+  return typePromises[type];
+}
 
 const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3'), 4: document.getElementById('step-4') };
 const stepLabel = document.getElementById('step-label');
@@ -246,15 +269,29 @@ function showStep(n) {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Normalise a type name from Claude's response to match the button data-type
-// values (case-insensitive). Falls back to the raw value if no match found.
-// Normalise a type name to the canonical form used as the button data-type
-function normalizeType(typeName) {
-  if (!typeName) return typeName;
-  const match = s2TypeButtons.find(
-    btn => btn.dataset.type.toLowerCase() === typeName.toLowerCase()
+// Normalise a type name to the canonical form used in available_types
+// (case-insensitive). Falls back to the raw value if no match found.
+function canonicalType(typeName) {
+  if (!typeName || !recommendationData) return typeName;
+  const match = recommendationData.available_types.find(
+    t => t.type.toLowerCase() === String(typeName).toLowerCase()
   );
-  return match ? match.dataset.type : typeName;
+  return match ? match.type : typeName;
+}
+
+// True when the recommendation flagged the challenge as out of scope
+function isOutOfScopeRec() {
+  if (!recommendationData) return false;
+  const r = recommendationData.recommendation;
+  return (r.rationale || '').trimStart().toUpperCase().startsWith('OUT OF SCOPE:') ||
+         (r.type || '').trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
+}
+
+// The canonical name of the recommended type, stripped of any stray prefix
+function recommendedType() {
+  if (!recommendationData) return null;
+  const clean = recommendationData.recommendation.type.replace(/^out of scope:\s*/i, '').trim();
+  return canonicalType(clean);
 }
 
 function showPedagogyNote(typeInfo) {
@@ -285,35 +322,8 @@ function renderTypeButtons(availableTypes, recommendedType) {
     btn.addEventListener('mouseenter', () => showPedagogyNote(typeInfo));
     btn.addEventListener('focus',      () => showPedagogyNote(typeInfo));
 
-    // Click to switch type
-    btn.addEventListener('click', async () => {
-      const type = btn.dataset.type;
-      const currentTypeName = currentResult && currentResult.recommendation
-        ? normalizeType(currentResult.recommendation.type)
-        : '';
-      if (type === currentTypeName) return;
-      if (typeCache[type]) { updatePreview(typeCache[type]); return; }
-      s2TypeButtons.forEach(b => b.disabled = true);
-      s2Regenerating.textContent = 'Generating ' + type + '...';
-      s2Regenerating.style.color = '';
-      s2Regenerating.classList.add('visible');
-      try {
-        const result = await callClaude(currentInput, type);
-        updatePreview(result);
-      } catch (err) {
-        s2Regenerating.textContent = 'Something went wrong generating ' + type + '. Try again.';
-        s2Regenerating.style.color = '#C84E00';
-        setTimeout(() => {
-          s2Regenerating.textContent = 'Regenerating...';
-          s2Regenerating.style.color = '';
-          s2Regenerating.classList.remove('visible');
-        }, 4000);
-      } finally {
-        s2TypeButtons.forEach(b => b.disabled = false);
-        // Only hide the message if it's still the default text (not an error)
-        if (!s2Regenerating.style.color) s2Regenerating.classList.remove('visible');
-      }
-    });
+    // Click to switch type — instant if cached or pre-generated
+    btn.addEventListener('click', () => selectType(typeInfo.type));
   });
 
   // Show recommended type's note by default
@@ -346,53 +356,88 @@ function setPreviewIframe(result) {
   };
 }
 
-function updatePreview(result) {
-  currentResult = result;
-  const rawType  = result.recommendation ? result.recommendation.type : result.type;
-  const rationale = result.recommendation ? result.recommendation.rationale : '';
+// Apply the recommend-phase response: badge, rationale, out-of-scope banner,
+// and the full set of type pills. Returns the canonical recommended type name.
+function applyRecommendation(rec) {
+  recommendationData = rec;
+  const typeName = recommendedType();
+  const rationale = rec.recommendation.rationale || '';
+  const outOfScope = isOutOfScopeRec();
 
-  // Detect out-of-scope — Claude may put the prefix in either field
-  const typeHasPrefix     = rawType.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
-  const rationaleHasPrefix = rationale.trimStart().toUpperCase().startsWith('OUT OF SCOPE:');
-  const isOutOfScope      = typeHasPrefix || rationaleHasPrefix;
-
-  // Always display a clean type name with no "OUT OF SCOPE:" prefix
-  const cleanType = rawType.replace(/^out of scope:\s*/i, '').trim();
-  const typeName  = normalizeType(cleanType) || cleanType;
-
-  // Store in session cache keyed by normalised type name
-  typeCache[typeName] = result;
-
-  // Surface out-of-scope banner and set detail text
-  s2OutOfScope.style.display = isOutOfScope ? 'flex' : 'none';
-  if (isOutOfScope) {
-    // Use whichever field carries the explanation
-    const detail = rationaleHasPrefix
-      ? rationale.replace(/^out of scope:\s*/i, '')
-      : rawType.replace(/^out of scope:\s*/i, '');
-    s2OutOfScopeDetail.textContent = ' ' + detail;
+  s2OutOfScope.style.display = outOfScope ? 'flex' : 'none';
+  if (outOfScope) {
+    s2OutOfScopeDetail.textContent = ' ' + rationale.replace(/^out of scope:\s*/i, '');
     s2RationaleText.style.display = 'none';
   } else {
     s2RationaleText.style.display = '';
   }
 
-  s2RecommendBadge.textContent = (isOutOfScope ? 'Closest alternative: ' : 'Recommended: ') + typeName;
+  s2RecommendBadge.textContent = (outOfScope ? 'Closest alternative: ' : 'Recommended: ') + typeName;
   s2RationaleText.textContent = rationale;
 
-  // Build type buttons exactly once from the initial recommendation response.
-  // On all subsequent type switches, only update active/cached state — never
-  // rebuild, which would change or lose the available options.
-  if (s2TypeButtons.length === 0 && result.available_types && result.available_types.length) {
-    renderTypeButtons(result.available_types, typeName);
+  renderTypeButtons(rec.available_types, typeName);
+  return typeName;
+}
+
+// Mark a pill as cached (generated and ready for instant viewing)
+function markCached(type) {
+  const btn = s2TypeButtons.find(b => b.dataset.type === type);
+  if (btn && type !== currentType) btn.classList.add('cached');
+}
+
+// Show an already-generated type in the preview and update all Step 2 state
+function showType(type) {
+  const gen = typeCache[type];
+  if (!gen) return;
+  currentType = type;
+
+  s2TypeButtons.forEach(btn => {
+    const isCurrent = btn.dataset.type === type;
+    btn.classList.toggle('active', isCurrent);
+    btn.classList.toggle('cached', !!typeCache[btn.dataset.type] && !isCurrent);
+  });
+
+  const isRec = type === recommendedType();
+  const outOfScope = isOutOfScopeRec();
+  if (isRec) {
+    s2RecommendBadge.textContent = (outOfScope ? 'Closest alternative: ' : 'Recommended: ') + type;
+    s2RationaleText.textContent = recommendationData.recommendation.rationale || '';
+    s2RationaleText.style.display = outOfScope ? 'none' : '';
   } else {
-    s2TypeButtons.forEach(btn => {
-      const isCurrent = btn.dataset.type === typeName;
-      btn.classList.toggle('active', isCurrent);
-      btn.classList.toggle('cached', !!typeCache[btn.dataset.type] && !isCurrent);
-    });
+    s2RecommendBadge.textContent = 'Viewing: ' + type;
+    s2RationaleText.textContent = gen.rationale || '';
+    s2RationaleText.style.display = gen.rationale ? '' : 'none';
   }
 
-  setPreviewIframe(result);
+  s2Regenerating.classList.remove('visible');
+  s2Regenerating.style.color = '';
+  s2ConfirmBtn.disabled = false;
+  setPreviewIframe(gen);
+}
+
+// Handle a type pill click: instant if cached, otherwise generate on demand.
+// viewToken ensures that if the designer clicks around while generations are
+// in flight, only the most recent choice updates the preview.
+async function selectType(type) {
+  if (type === currentType) return;
+  const token = ++viewToken;
+  if (typeCache[type]) { showType(type); return; }
+
+  s2Regenerating.textContent = 'Generating ' + type + '...';
+  s2Regenerating.style.color = '';
+  s2Regenerating.classList.add('visible');
+  previewShimmer.classList.add('visible');
+
+  try {
+    await fetchGeneration(type);
+    if (token !== viewToken) return; // designer moved on to another type
+    showType(type);
+  } catch (err) {
+    if (token !== viewToken) return;
+    previewShimmer.classList.remove('visible');
+    s2Regenerating.textContent = 'Something went wrong generating ' + type + '. Click it again to retry.';
+    s2Regenerating.style.color = '#C84E00';
+  }
 }
 
 textarea.addEventListener('input', () => {
@@ -422,17 +467,41 @@ analyzeBtn.addEventListener('click', async () => {
   if (input.length < 50) return;
   currentInput = input;
   errorBox.style.display = 'none';
-  // Reset type buttons and cache so the new analysis starts clean
+  // Reset all Step 2 state so the new analysis starts clean
   s2TypeButtons = [];
   s2TypeButtonsContainer.innerHTML = '';
   Object.keys(typeCache).forEach(k => delete typeCache[k]);
+  Object.keys(typePromises).forEach(k => delete typePromises[k]);
+  recommendationData = null;
+  currentType = null;
+  viewToken++;
+  s2ConfirmBtn.disabled = true;
   s2PedagogyPanel.classList.remove('visible');
+  s2OutOfScope.style.display = 'none';
   setStep2Substate('loading');
   showStep(2);
   try {
-    const result = await callClaude(input);
-    updatePreview(result);
+    // Phase 1 — fast recommendation call: Step 2 paints in seconds
+    const rec = await callApi({ mode: 'recommend', userInput: input });
+    const recType = applyRecommendation(rec);
     setStep2Substate('preview');
+
+    // Phase 2 — generate the recommended interaction while the designer reads
+    previewIframe.srcdoc = '';
+    previewShimmer.classList.add('visible');
+    s2Regenerating.textContent = 'Generating ' + recType + ' preview...';
+    s2Regenerating.style.color = '';
+    s2Regenerating.classList.add('visible');
+    const token = ++viewToken;
+    await fetchGeneration(recType);
+    if (token === viewToken) showType(recType);
+
+    // Phase 3 — quietly pre-generate the next two strongest fits so
+    // exploring them is instant. Failures here are silent; clicking the
+    // pill simply generates on demand instead.
+    rec.available_types.slice(1, 3).forEach(t => {
+      fetchGeneration(canonicalType(t.type)).catch(() => {});
+    });
   } catch (err) {
     showStep(1);
     errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
@@ -441,11 +510,21 @@ analyzeBtn.addEventListener('click', async () => {
 });
 
 s2ConfirmBtn.addEventListener('click', () => {
-  confirmedResult = currentResult;
+  const gen = currentType ? typeCache[currentType] : null;
+  if (!gen) return; // nothing generated yet
+  confirmedResult = {
+    recommendation: {
+      type: currentType,
+      rationale: gen.rationale || (recommendationData ? recommendationData.recommendation.rationale : '')
+    },
+    visual_theme: gen.visual_theme,
+    json: gen.json,
+    static: gen.static
+  };
   // Populate the edit textareas with the generated content
-  editHtml.value   = confirmedResult.json.html;
-  editScript.value = confirmedResult.json.script;
-  editStatic.value = confirmedResult.static;
+  editHtml.value   = gen.json.html;
+  editScript.value = gen.json.script;
+  editStatic.value = gen.static;
   showStep(3);
 });
 
