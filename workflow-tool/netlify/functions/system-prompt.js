@@ -190,6 +190,8 @@ The designer has described a content challenge, and an interaction type has alre
 
 Always generate the requested type — even if another type might fit better. The designer has made their choice. Do NOT generate static companion text in this call — that happens separately.
 
+If the designer specifies structure — section headings, tab labels, item wording, ordering, number of parts — follow their specification exactly. Their named headings are the headings; their items are the items. Apply content scoping judgment only to material they have NOT explicitly structured.
+
 ---
 
 ${TYPES}

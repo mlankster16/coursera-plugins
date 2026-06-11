@@ -214,11 +214,17 @@ async function callApi(payload, onProgress) {
 
 let currentInput = '';
 let recommendationData = null;  // { recommendation, available_types } from the recommend call
-let currentType = null;         // canonical name of the type currently shown in the preview
+let currentType = null;         // display name of the type currently shown in the preview
 let confirmedResult = null;
 let viewToken = 0;              // guards against stale async preview updates
-const typeCache = {};           // type name -> generation result for this session
-const typePromises = {};        // type name -> in-flight generation promise (dedupe)
+let analysisToken = 0;          // identifies the current analysis run
+let directedType = null;        // set when the designer chose the type ("I know what I want")
+const typeCache = {};           // keyOf(type) -> generation result for this session
+const typePromises = {};        // keyOf(type) -> in-flight generation promise (dedupe)
+
+// Cache keys are case-insensitive: the designer's chosen type string and the
+// API's type names must hit the same entries regardless of casing.
+const keyOf = t => String(t).toLowerCase();
 
 // Progress handlers keyed by type — set by whichever UI is watching a
 // generation. Read dynamically, so attaching a handler works even when the
@@ -228,45 +234,47 @@ const progressHandlers = {};
 // Route preview progress to exactly one type (clears any stale handlers)
 function watchProgress(type, handler) {
   Object.keys(progressHandlers).forEach(k => delete progressHandlers[k]);
-  progressHandlers[type] = handler;
+  progressHandlers[keyOf(type)] = handler;
 }
 
 // Fetch (or reuse) the generated interaction for a type. Background
 // pre-generation and pill clicks share this — a type is never generated twice.
 function fetchGeneration(type) {
-  if (typeCache[type]) return Promise.resolve(typeCache[type]);
-  if (!typePromises[type]) {
-    typePromises[type] = callApi(
+  const k = keyOf(type);
+  if (typeCache[k]) return Promise.resolve(typeCache[k]);
+  if (!typePromises[k]) {
+    typePromises[k] = callApi(
       { mode: 'generate', userInput: currentInput, type },
-      chars => { if (progressHandlers[type]) progressHandlers[type](chars); }
+      chars => { if (progressHandlers[k]) progressHandlers[k](chars); }
     )
       .then(result => {
-        typeCache[type] = result;
+        typeCache[k] = result;
         markCached(type);
         return result;
       })
-      .finally(() => { delete typePromises[type]; });
+      .finally(() => { delete typePromises[k]; });
   }
-  return typePromises[type];
+  return typePromises[k];
 }
 
 // Static companion text is generated lazily — only when the designer confirms
 // a type — so previews and background pre-generation never pay for it.
-const staticCache = {};     // type name -> static text
-const staticPromises = {};  // type name -> in-flight promise (dedupe)
+const staticCache = {};     // keyOf(type) -> static text
+const staticPromises = {};  // keyOf(type) -> in-flight promise (dedupe)
 
 function fetchStatic(type) {
-  if (staticCache[type]) return Promise.resolve(staticCache[type]);
-  if (!staticPromises[type]) {
-    const gen = typeCache[type];
-    staticPromises[type] = callApi({ mode: 'static', userInput: currentInput, type, html: gen.json.html })
+  const k = keyOf(type);
+  if (staticCache[k]) return Promise.resolve(staticCache[k]);
+  if (!staticPromises[k]) {
+    const gen = typeCache[k];
+    staticPromises[k] = callApi({ mode: 'static', userInput: currentInput, type, html: gen.json.html })
       .then(result => {
-        staticCache[type] = result.static;
+        staticCache[k] = result.static;
         return result.static;
       })
-      .finally(() => { delete staticPromises[type]; });
+      .finally(() => { delete staticPromises[k]; });
   }
-  return staticPromises[type];
+  return staticPromises[k];
 }
 
 const steps = { 1: document.getElementById('step-1'), 2: document.getElementById('step-2'), 3: document.getElementById('step-3'), 4: document.getElementById('step-4') };
@@ -353,9 +361,9 @@ function renderTypeButtons(availableTypes, recommendedType) {
     btn.className = 'type-pill';
     btn.dataset.type = typeInfo.type;
     btn.textContent = typeInfo.type;
-    if (typeInfo.type === recommendedType) {
+    if (keyOf(typeInfo.type) === keyOf(recommendedType)) {
       btn.classList.add('active');
-    } else if (typeCache[typeInfo.type]) {
+    } else if (typeCache[keyOf(typeInfo.type)]) {
       btn.classList.add('cached'); // already generated in this session
     }
     s2TypeButtonsContainer.appendChild(btn);
@@ -370,7 +378,7 @@ function renderTypeButtons(availableTypes, recommendedType) {
   });
 
   // Show recommended type's note by default
-  const rec = availableTypes.find(t => t.type === recommendedType);
+  const rec = availableTypes.find(t => keyOf(t.type) === keyOf(recommendedType));
   if (rec) showPedagogyNote(rec);
 }
 
@@ -446,25 +454,32 @@ function applyRecommendation(rec) {
 
 // Mark a pill as cached (generated and ready for instant viewing)
 function markCached(type) {
-  const btn = s2TypeButtons.find(b => b.dataset.type === type);
-  if (btn && type !== currentType) btn.classList.add('cached');
+  const btn = s2TypeButtons.find(b => keyOf(b.dataset.type) === keyOf(type));
+  if (btn && keyOf(type) !== keyOf(currentType)) btn.classList.add('cached');
 }
 
-// Show an already-generated type in the preview and update all Step 2 state
+// Show an already-generated type in the preview and update all Step 2 state.
+// The "base type" is the designer's own choice in directed mode, or the
+// recommendation otherwise — it keeps its special badge; others show "Viewing".
 function showType(type) {
-  const gen = typeCache[type];
+  const gen = typeCache[keyOf(type)];
   if (!gen) return;
   currentType = type;
 
   s2TypeButtons.forEach(btn => {
-    const isCurrent = btn.dataset.type === type;
+    const isCurrent = keyOf(btn.dataset.type) === keyOf(type);
     btn.classList.toggle('active', isCurrent);
-    btn.classList.toggle('cached', !!typeCache[btn.dataset.type] && !isCurrent);
+    btn.classList.toggle('cached', !!typeCache[keyOf(btn.dataset.type)] && !isCurrent);
   });
 
-  const isRec = type === recommendedType();
-  const outOfScope = isOutOfScopeRec();
-  if (isRec) {
+  const baseType = directedType || recommendedType();
+  const isBase = keyOf(type) === keyOf(baseType);
+  const outOfScope = !directedType && isOutOfScopeRec();
+  if (isBase && directedType) {
+    s2RecommendBadge.textContent = 'Your choice: ' + type;
+    s2RationaleText.textContent = gen.rationale || '';
+    s2RationaleText.style.display = gen.rationale ? '' : 'none';
+  } else if (isBase) {
     s2RecommendBadge.textContent = (outOfScope ? 'Closest alternative: ' : 'Recommended: ') + type;
     s2RationaleText.textContent = recommendationData.recommendation.rationale || '';
     s2RationaleText.style.display = outOfScope ? 'none' : '';
@@ -485,9 +500,9 @@ function showType(type) {
 // viewToken ensures that if the designer clicks around while generations are
 // in flight, only the most recent choice updates the preview.
 async function selectType(type) {
-  if (type === currentType) return;
+  if (keyOf(type) === keyOf(currentType)) return;
   const token = ++viewToken;
-  if (typeCache[type]) { showType(type); return; }
+  if (typeCache[keyOf(type)]) { showType(type); return; }
 
   showPreviewLoading(type);
 
@@ -527,12 +542,37 @@ exampleBtn.addEventListener('click', () => {
   }, 2000);
 });
 
-analyzeBtn.addEventListener('click', async () => {
-  const input = textarea.value.trim();
-  if (input.length < 50) return;
-  currentInput = input;
-  errorBox.style.display = 'none';
-  // Reset all Step 2 state so the new analysis starts clean
+// ── Mode toggle: "Recommend for me" vs "I know what I want" ────────────────
+let appMode = 'recommend';
+const modeRecommendBtn = document.getElementById('mode-recommend-btn');
+const modeDirectedBtn  = document.getElementById('mode-directed-btn');
+const directedControls = document.getElementById('directed-controls');
+const directedTypeSelect = document.getElementById('directed-type');
+const challengeLabel   = document.getElementById('challenge-label');
+
+const DIRECTED_PLACEHOLDER = "Example: A click-to-reveal set on pharmacology abbreviations. Six cards: PRN, BID, TID, QID, PO, and NPO. Each card front shows the abbreviation; the reveal shows the full term, what it means in practice, and one example order. Keep the tone clinical and concise.";
+let recommendPlaceholder = null; // captured from the HTML on first toggle
+
+function setMode(mode) {
+  appMode = mode;
+  const directed = mode === 'directed';
+  modeRecommendBtn.classList.toggle('active', !directed);
+  modeDirectedBtn.classList.toggle('active', directed);
+  modeRecommendBtn.setAttribute('aria-checked', String(!directed));
+  modeDirectedBtn.setAttribute('aria-checked', String(directed));
+  directedControls.style.display = directed ? 'block' : 'none';
+  if (recommendPlaceholder === null) recommendPlaceholder = textarea.placeholder;
+  challengeLabel.textContent = directed
+    ? 'Describe your content and how you want it structured'
+    : 'Describe your learning design challenge';
+  textarea.placeholder = directed ? DIRECTED_PLACEHOLDER : recommendPlaceholder;
+  analyzeBtn.lastChild.textContent = directed ? ' Generate Interaction' : ' Analyze Challenge';
+}
+
+modeRecommendBtn.addEventListener('click', () => setMode('recommend'));
+modeDirectedBtn.addEventListener('click', () => setMode('directed'));
+
+function resetAnalysisState() {
   s2TypeButtons = [];
   s2TypeButtonsContainer.innerHTML = '';
   Object.keys(typeCache).forEach(k => delete typeCache[k]);
@@ -541,30 +581,76 @@ analyzeBtn.addEventListener('click', async () => {
   Object.keys(staticPromises).forEach(k => delete staticPromises[k]);
   recommendationData = null;
   currentType = null;
+  directedType = null;
   viewToken++;
+  analysisToken++;
   s2ConfirmBtn.disabled = true;
   s2PedagogyPanel.classList.remove('visible');
   s2OutOfScope.style.display = 'none';
-  setStep2Substate('loading');
+  s2Regenerating.classList.remove('visible');
+}
+
+// "Recommend for me": recommend → generate → pre-generate alternatives
+async function runRecommended(input) {
+  // Phase 1 — fast recommendation call: Step 2 paints in seconds
+  const rec = await callApi({ mode: 'recommend', userInput: input });
+  const recType = applyRecommendation(rec);
+  setStep2Substate('preview');
+
+  // Phase 2 — generate the recommended interaction while the designer reads
+  showPreviewLoading(recType);
+  const token = ++viewToken;
+  await fetchGeneration(recType);
+  if (token === viewToken) showType(recType);
+
+  // Phase 3 — quietly pre-generate the next two strongest fits so
+  // exploring them is instant. Failures here are silent; clicking the
+  // pill simply generates on demand instead.
+  rec.available_types.slice(1, 3).forEach(t => {
+    fetchGeneration(canonicalType(t.type)).catch(() => {});
+  });
+}
+
+// "I know what I want": generate the chosen type immediately. The pills and
+// pedagogy notes still load from a background recommend call, so the designer
+// can compare alternatives — but nothing waits on it.
+async function runDirected(input) {
+  const chosen = directedTypeSelect.value;
+  directedType = chosen;
+  const analysis = analysisToken;
+
+  s2RecommendBadge.textContent = 'Your choice: ' + chosen;
+  s2RationaleText.textContent = '';
+  s2RationaleText.style.display = 'none';
+  showPreviewLoading(chosen);
+
+  // Background: fetch pedagogy notes for the pill row (nice-to-have)
+  callApi({ mode: 'recommend', userInput: input })
+    .then(rec => {
+      if (analysis !== analysisToken || s2TypeButtons.length > 0) return;
+      recommendationData = rec;
+      renderTypeButtons(rec.available_types, chosen);
+    })
+    .catch(() => {}); // pills simply don't appear; generation is unaffected
+
+  const token = ++viewToken;
+  await fetchGeneration(chosen);
+  if (token === viewToken) showType(chosen);
+}
+
+analyzeBtn.addEventListener('click', async () => {
+  const input = textarea.value.trim();
+  if (input.length < 50) return;
+  currentInput = input;
+  errorBox.style.display = 'none';
+  resetAnalysisState();
+  // Directed mode skips the analysis spinner — Step 2 opens straight onto
+  // the preview area with the loading overlay running.
+  setStep2Substate(appMode === 'directed' ? 'preview' : 'loading');
   showStep(2);
   try {
-    // Phase 1 — fast recommendation call: Step 2 paints in seconds
-    const rec = await callApi({ mode: 'recommend', userInput: input });
-    const recType = applyRecommendation(rec);
-    setStep2Substate('preview');
-
-    // Phase 2 — generate the recommended interaction while the designer reads
-    showPreviewLoading(recType);
-    const token = ++viewToken;
-    await fetchGeneration(recType);
-    if (token === viewToken) showType(recType);
-
-    // Phase 3 — quietly pre-generate the next two strongest fits so
-    // exploring them is instant. Failures here are silent; clicking the
-    // pill simply generates on demand instead.
-    rec.available_types.slice(1, 3).forEach(t => {
-      fetchGeneration(canonicalType(t.type)).catch(() => {});
-    });
+    if (appMode === 'directed') await runDirected(input);
+    else await runRecommended(input);
   } catch (err) {
     showStep(1);
     errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
@@ -575,7 +661,7 @@ analyzeBtn.addEventListener('click', async () => {
 let confirmToken = 0; // guards the async static fill if the user re-confirms
 
 s2ConfirmBtn.addEventListener('click', async () => {
-  const gen = currentType ? typeCache[currentType] : null;
+  const gen = currentType ? typeCache[keyOf(currentType)] : null;
   if (!gen) return; // nothing generated yet
   confirmedResult = {
     recommendation: {
@@ -593,8 +679,8 @@ s2ConfirmBtn.addEventListener('click', async () => {
   // Static companion text is generated on demand, right now — the designer
   // can edit HTML/JS while it writes. Output stays disabled until it lands.
   const token = ++confirmToken;
-  if (staticCache[currentType]) {
-    editStatic.value = staticCache[currentType];
+  if (staticCache[keyOf(currentType)]) {
+    editStatic.value = staticCache[keyOf(currentType)];
     editStatic.disabled = false;
     s3GenerateBtn.disabled = false;
     return;

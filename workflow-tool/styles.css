@@ -126,6 +126,51 @@ main {
   max-width: 620px;
 }
 
+.mode-toggle {
+  display: inline-flex;
+  gap: 0;
+  margin-bottom: 24px;
+  border: 0.5px solid var(--hatteras);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--white);
+}
+
+.mode-btn {
+  padding: 10px 18px;
+  border: none;
+  background: var(--white);
+  color: var(--graphite);
+  font-family: 'Montserrat', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.mode-btn.active { background: var(--navy); color: var(--white); }
+.mode-btn:not(.active):hover { color: var(--navy); }
+.mode-btn:focus-visible { outline: 3px solid var(--persimmon); outline-offset: -3px; }
+
+.directed-select {
+  display: block;
+  width: 100%;
+  max-width: 320px;
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 0.92rem;
+  color: var(--cast-iron);
+  background: var(--white);
+  border: 0.5px solid var(--hatteras);
+  border-radius: 8px;
+  cursor: pointer;
+  outline: none;
+}
+
+.directed-select:focus { border-color: var(--royal); box-shadow: 0 0 0 3px rgba(0, 83, 155, 0.15); }
+
 .form-label {
   display: block;
   font-family: 'Montserrat', Arial, sans-serif;

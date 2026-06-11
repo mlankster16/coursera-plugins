@@ -37,7 +37,24 @@
         Describe your learning design challenge and this tool will identify the best interaction type for your content, generate a ready-to-use Coursera plugin JSON configuration, and provide an accessible static companion text.
       </p>
 
-      <label class="form-label" for="challenge-input">Describe your learning design challenge</label>
+      <div class="mode-toggle" role="radiogroup" aria-label="How do you want to start?">
+        <button type="button" class="mode-btn active" id="mode-recommend-btn" role="radio" aria-checked="true">Recommend for me</button>
+        <button type="button" class="mode-btn" id="mode-directed-btn" role="radio" aria-checked="false">I know what I want</button>
+      </div>
+
+      <div id="directed-controls" style="display:none;">
+        <label class="form-label" for="directed-type">Interaction type</label>
+        <select id="directed-type" class="directed-select">
+          <option value="Tabbed explorer">Tabbed explorer</option>
+          <option value="Click-to-reveal">Click-to-reveal</option>
+          <option value="Inline quiz">Inline quiz</option>
+          <option value="Sequencing">Sequencing</option>
+          <option value="Drag-to-classify">Drag-to-classify</option>
+          <option value="Annotated text">Annotated text</option>
+        </select>
+      </div>
+
+      <label class="form-label" for="challenge-input" id="challenge-label">Describe your learning design challenge</label>
       <textarea
         id="challenge-input"
         class="challenge-textarea"
