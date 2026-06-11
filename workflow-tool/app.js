@@ -115,8 +115,14 @@ async function mockApi({ mode, type }) {
 //   { mode: 'generate',  userInput, type }          — full build (Sonnet)
 // The API key lives in Netlify's environment variables — never in
 // the browser or this file. No credentials needed on the client side.
-async function callApi(payload) {
-  if (USE_MOCK_API) return mockApi(payload);
+async function callApi(payload, onProgress) {
+  if (USE_MOCK_API) {
+    if (onProgress) {
+      // Simulate streaming progress so the loading bar is testable in mock mode
+      for (let c = 800; c <= 7200; c += 800) setTimeout(() => onProgress(c), c / 8);
+    }
+    return mockApi(payload);
+  }
 
   const response = await fetch('/.netlify/functions/analyze', {
     method: 'POST',
@@ -148,6 +154,7 @@ async function callApi(payload) {
       const evt = JSON.parse(payload);
       if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
         raw += evt.delta.text;
+        if (onProgress) onProgress(raw.length);
       } else if (evt.type === 'message_delta' && evt.delta?.stop_reason) {
         stopReason = evt.delta.stop_reason;
       } else if (evt.type === 'error') {
@@ -213,12 +220,26 @@ let viewToken = 0;              // guards against stale async preview updates
 const typeCache = {};           // type name -> generation result for this session
 const typePromises = {};        // type name -> in-flight generation promise (dedupe)
 
+// Progress handlers keyed by type — set by whichever UI is watching a
+// generation. Read dynamically, so attaching a handler works even when the
+// generation was already started in the background.
+const progressHandlers = {};
+
+// Route preview progress to exactly one type (clears any stale handlers)
+function watchProgress(type, handler) {
+  Object.keys(progressHandlers).forEach(k => delete progressHandlers[k]);
+  progressHandlers[type] = handler;
+}
+
 // Fetch (or reuse) the generated interaction for a type. Background
 // pre-generation and pill clicks share this — a type is never generated twice.
 function fetchGeneration(type) {
   if (typeCache[type]) return Promise.resolve(typeCache[type]);
   if (!typePromises[type]) {
-    typePromises[type] = callApi({ mode: 'generate', userInput: currentInput, type })
+    typePromises[type] = callApi(
+      { mode: 'generate', userInput: currentInput, type },
+      chars => { if (progressHandlers[type]) progressHandlers[type](chars); }
+    )
       .then(result => {
         typeCache[type] = result;
         markCached(type);
@@ -353,6 +374,28 @@ function renderTypeButtons(availableTypes, recommendedType) {
   if (rec) showPedagogyNote(rec);
 }
 
+const previewLoading     = document.getElementById('preview-loading');
+const previewLoadingText = document.getElementById('preview-loading-text');
+const previewLoadingFill = document.getElementById('preview-loading-fill');
+
+// Show the loading overlay on the preview: shimmer + label + progress bar.
+// Progress is real — streamed characters against a typical ~8k-char response.
+function showPreviewLoading(type) {
+  previewIframe.srcdoc = '';
+  previewShimmer.classList.add('visible');
+  previewLoadingText.textContent = 'Generating ' + type + '...';
+  previewLoadingFill.style.width = '0%';
+  previewLoading.classList.add('visible');
+  watchProgress(type, chars => {
+    previewLoadingFill.style.width = Math.min(95, Math.round(chars / 85)) + '%';
+  });
+}
+
+function hidePreviewLoading() {
+  previewLoading.classList.remove('visible');
+  Object.keys(progressHandlers).forEach(k => delete progressHandlers[k]);
+}
+
 function setStep2Substate(state) {
   step2El.classList.remove('step-2--loading', 'step-2--preview');
   step2El.classList.add('step-2--' + state);
@@ -434,6 +477,7 @@ function showType(type) {
   s2Regenerating.classList.remove('visible');
   s2Regenerating.style.color = '';
   s2ConfirmBtn.disabled = false;
+  hidePreviewLoading();
   setPreviewIframe(gen);
 }
 
@@ -445,10 +489,7 @@ async function selectType(type) {
   const token = ++viewToken;
   if (typeCache[type]) { showType(type); return; }
 
-  s2Regenerating.textContent = 'Generating ' + type + '...';
-  s2Regenerating.style.color = '';
-  s2Regenerating.classList.add('visible');
-  previewShimmer.classList.add('visible');
+  showPreviewLoading(type);
 
   try {
     await fetchGeneration(type);
@@ -456,9 +497,11 @@ async function selectType(type) {
     showType(type);
   } catch (err) {
     if (token !== viewToken) return;
+    hidePreviewLoading();
     previewShimmer.classList.remove('visible');
     s2Regenerating.textContent = 'Something went wrong generating ' + type + '. Click it again to retry.';
     s2Regenerating.style.color = '#C84E00';
+    s2Regenerating.classList.add('visible');
   }
 }
 
@@ -511,11 +554,7 @@ analyzeBtn.addEventListener('click', async () => {
     setStep2Substate('preview');
 
     // Phase 2 — generate the recommended interaction while the designer reads
-    previewIframe.srcdoc = '';
-    previewShimmer.classList.add('visible');
-    s2Regenerating.textContent = 'Generating ' + recType + ' preview...';
-    s2Regenerating.style.color = '';
-    s2Regenerating.classList.add('visible');
+    showPreviewLoading(recType);
     const token = ++viewToken;
     await fetchGeneration(recType);
     if (token === viewToken) showType(recType);

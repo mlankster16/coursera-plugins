@@ -90,6 +90,10 @@
         <p class="s2-preview-label">Live Preview</p>
         <div id="preview-wrapper">
           <div class="preview-shimmer" id="preview-shimmer"></div>
+          <div class="preview-loading" id="preview-loading" role="status">
+            <span class="preview-loading-text" id="preview-loading-text">Generating...</span>
+            <div class="preview-loading-bar"><div class="preview-loading-fill" id="preview-loading-fill"></div></div>
+          </div>
           <iframe
             id="preview-iframe"
             sandbox="allow-scripts allow-same-origin"
