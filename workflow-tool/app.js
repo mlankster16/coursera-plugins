@@ -130,6 +130,24 @@ async function callClaude(userInput, forcedType) {
   const decoder = new TextDecoder();
   let raw = '';
   let sseBuffer = '';
+  let stopReason = null;
+  let streamError = null;
+
+  const processLine = (line) => {
+    if (!line.startsWith('data: ')) return;
+    const payload = line.slice(6).trim();
+    if (payload === '[DONE]') return;
+    try {
+      const evt = JSON.parse(payload);
+      if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
+        raw += evt.delta.text;
+      } else if (evt.type === 'message_delta' && evt.delta?.stop_reason) {
+        stopReason = evt.delta.stop_reason;
+      } else if (evt.type === 'error') {
+        streamError = evt.error?.message || 'unknown stream error';
+      }
+    } catch { /* ignore malformed SSE lines */ }
+  };
 
   while (true) {
     const { done, value } = await reader.read();
@@ -137,32 +155,17 @@ async function callClaude(userInput, forcedType) {
     sseBuffer += decoder.decode(value, { stream: true });
     const lines = sseBuffer.split('\n');
     sseBuffer = lines.pop(); // keep any incomplete line for the next chunk
-    for (const line of lines) {
-      if (!line.startsWith('data: ')) continue;
-      const payload = line.slice(6).trim();
-      if (payload === '[DONE]') continue;
-      try {
-        const evt = JSON.parse(payload);
-        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          raw += evt.delta.text;
-        }
-      } catch { /* ignore malformed SSE lines */ }
-    }
+    lines.forEach(processLine);
   }
 
   // Flush anything left in the buffer after the stream closes
-  if (sseBuffer.trim()) {
-    for (const line of sseBuffer.split('\n')) {
-      if (!line.startsWith('data: ')) continue;
-      const payload = line.slice(6).trim();
-      if (payload === '[DONE]') continue;
-      try {
-        const evt = JSON.parse(payload);
-        if (evt.type === 'content_block_delta' && evt.delta?.type === 'text_delta') {
-          raw += evt.delta.text;
-        }
-      } catch { /* ignore */ }
-    }
+  if (sseBuffer.trim()) sseBuffer.split('\n').forEach(processLine);
+
+  if (streamError) {
+    throw new Error(`The AI stream reported an error: ${streamError}`);
+  }
+  if (stopReason === 'max_tokens') {
+    throw new Error('The response was cut off before it finished (hit the length limit). Please try again.');
   }
 
   const cleaned = raw
