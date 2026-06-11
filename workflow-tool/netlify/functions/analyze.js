@@ -1,6 +1,9 @@
 // Netlify Functions v2 — streams the Anthropic SSE response directly to the
 // client so tokens arrive continuously and the connection never goes idle.
 // The API key lives in Netlify environment variables only — never in source code.
+// The system prompt lives server-side in system-prompt.js — the client never sends it.
+
+import { SYSTEM_PROMPT } from './system-prompt.js';
 
 export default async (req) => {
   if (req.method !== 'POST') {
@@ -28,11 +31,11 @@ export default async (req) => {
     });
   }
 
-  const { userInput, forcedType, systemPrompt } = body;
+  const { userInput, forcedType } = body;
 
-  if (!userInput || !systemPrompt) {
+  if (!userInput) {
     return new Response(
-      JSON.stringify({ error: 'Missing required fields: userInput and systemPrompt' }),
+      JSON.stringify({ error: 'Missing required field: userInput' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -59,7 +62,7 @@ export default async (req) => {
       model: 'claude-sonnet-4-5',
       max_tokens: 8192,
       stream: true,
-      system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
+      system: [{ type: 'text', text: SYSTEM_PROMPT, cache_control: { type: 'ephemeral' } }],
       messages: [{ role: 'user', content: messageContent }]
     })
   });
