@@ -220,10 +220,20 @@ Respond in this exact JSON structure. No text before or after — only the JSON 
   "json": {
     "html": "complete self-contained HTML and CSS string with Duke brand applied",
     "script": "complete JavaScript string using addEventListener only, no inline handlers"
-  }
+  },
+  "content": [
+    { "label": "Short name for where this text lives — e.g. 'Title', 'Instructions', 'Tab 2 label', 'Card 3 — reveal text', 'Question', 'Option B', 'Option B feedback'", "text": "the exact text string as it appears in the html" }
+  ]
 }
 
 The html and script fields must contain a complete, functional interaction — never placeholder text or a summary of what would be there.
+
+CONTENT ARRAY RULES — this powers the designer's text editor, so precision matters:
+- List EVERY learner-visible text string in the interaction, in document order: title, instructions, tab labels, panel text, card fronts and reveals, questions, answer options, feedback messages, item labels, button text.
+- Each "text" value must match its occurrence in the html field character-for-character (same punctuation, spacing, capitalization) — the tool locates and replaces these strings verbatim. If a text string lives in the script field instead (avoid this where possible), it must still match character-for-character there.
+- Each entry is one logical chunk: a heading, one paragraph, one label, one option. Split multi-paragraph panels into one entry per paragraph.
+- Never include CSS, element ids, class names, attribute values, or code in content entries.
+- Avoid HTML entities inside learner-visible text — write characters directly so the text matches what the designer sees.
 
 You must ALWAYS respond in this exact JSON structure — never plain text, never conversational, never a refusal.
 

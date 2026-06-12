@@ -4,7 +4,7 @@
     {
       "name": "workflow-tool",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-c", "import os; os.chdir('/Users/meganlancaster/Desktop/Claude Code/coursera-plugin/workflow-tool'); import http.server as h; h.test(HandlerClass=h.SimpleHTTPRequestHandler, port=8741)"],
+      "runtimeArgs": ["-I", "-c", "import functools, http.server as h; H = functools.partial(h.SimpleHTTPRequestHandler, directory='/Users/meganlancaster/Desktop/Claude Code/coursera-plugin/workflow-tool'); h.test(HandlerClass=H, port=8741, bind='127.0.0.1')"],
       "port": 8741
     }
   ]
