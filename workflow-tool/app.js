@@ -207,24 +207,57 @@ async function callApi(payload, onProgress) {
   try {
     return JSON.parse(cleaned);
   } catch (parseErr) {
-    // Second attempt — repair common Claude JSON issues:
-    // actual newlines/tabs inside string values break JSON.parse
-    const repaired = cleaned
-      .replace(/:\s*"([\s\S]*?)"\s*([,}])/g, (match, val, trail) => {
-        const fixed = val
-          .replace(/\\/g, '\\\\')   // escape lone backslashes first
-          .replace(/\n/g, '\\n')    // newlines → \n
-          .replace(/\r/g, '\\r')    // carriage returns → \r
-          .replace(/\t/g, '\\t')    // tabs → \t
-          .replace(/\\\\/g, '\\');  // undo double-escaped backslashes we already had
-        return `: "${fixed}"${trail}`;
-      });
+    // Second attempt — character-level repair of the three failures Claude
+    // actually produces: literal newlines/tabs inside strings, unescaped
+    // inner quotes, and stray lone backslashes.
     try {
-      return JSON.parse(repaired);
+      return JSON.parse(repairJson(cleaned));
     } catch {
+      console.error('Unparseable AI response:', raw);
       throw new Error(`The AI returned a response that could not be parsed. Please try again. (Detail: ${parseErr.message})`);
     }
   }
+}
+
+// Walk the JSON text character by character, tracking string state. Inside
+// strings: escape raw newlines/tabs, escape backslashes that don't start a
+// valid escape sequence, and treat a quote as the string's end only when the
+// next meaningful character is structural (, } ] :) — otherwise it's an
+// unescaped inner quote and gets escaped.
+function repairJson(src) {
+  let out = '';
+  let inStr = false;
+  for (let i = 0; i < src.length; i++) {
+    const c = src[i];
+    if (!inStr) {
+      if (c === '"') inStr = true;
+      out += c;
+      continue;
+    }
+    if (c === '\\') {
+      const n = src[i + 1];
+      if (n !== undefined && '"\\/bfnrtu'.includes(n)) { out += c + n; i++; }
+      else out += '\\\\'; // lone backslash — escape it
+      continue;
+    }
+    if (c === '\n') { out += '\\n'; continue; }
+    if (c === '\r') { out += '\\r'; continue; }
+    if (c === '\t') { out += '\\t'; continue; }
+    if (c === '"') {
+      let j = i + 1;
+      while (j < src.length && ' \t\n\r'.includes(src[j])) j++;
+      const next = src[j];
+      if (next === undefined || next === ',' || next === '}' || next === ']' || next === ':') {
+        inStr = false;
+        out += c;
+      } else {
+        out += '\\"'; // unescaped quote inside the string value
+      }
+      continue;
+    }
+    out += c;
+  }
+  return out;
 }
 
 let currentInput = '';
