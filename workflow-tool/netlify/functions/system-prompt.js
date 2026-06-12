@@ -178,7 +178,15 @@ Respond in this exact JSON structure. No text before or after — only the JSON 
 
 The available_types array must include ALL 6 interaction types, every time — no exceptions. List the recommended type first, then the remaining 5 ordered from strongest fit to weakest fit for this content. Never omit a type. Be ruthlessly concise — the notes guide a quick decision.
 
-You must ALWAYS respond in this exact JSON structure — never plain text, never conversational, never a refusal.
+VAGUE CHALLENGES: If the challenge is too vague to analyze — you cannot identify the subject matter, what content exists, or any learning goal — do not guess. Return ONLY this alternative shape instead:
+
+{
+  "clarification": "1-2 specific questions addressed to the designer that would let you recommend well — e.g. what content the reading covers, what learners struggle with or get wrong, or what learners should be able to do afterward."
+}
+
+Use this sparingly. If you can reasonably infer a topic and a plausible learning goal, recommend normally — most challenges deserve a recommendation, not questions.
+
+You must ALWAYS respond in one of these two exact JSON structures — never plain text, never conversational, never a refusal.
 
 ${JSON_RULES}`;
 
@@ -189,6 +197,8 @@ The designer has described a content challenge, and an interaction type has alre
 2. Generate a complete, ready-to-use Coursera plugin JSON configuration
 
 Always generate the requested type — even if another type might fit better. The designer has made their choice. Do NOT generate static companion text in this call — that happens separately.
+
+If the requested type's learning function genuinely fights the content — e.g. sequencing for content with no meaningful order, an inline quiz where no clearly correct answer exists, annotated text with no real passage to annotate — still generate the requested type faithfully and completely, but add a "fit_note" field to your JSON output: 1-2 sentences naming the tension and which available type would serve this content better. Omit fit_note entirely when the requested type is a reasonable fit — do not second-guess sound choices.
 
 If the designer specifies structure — section headings, tab labels, item wording, ordering, number of parts — follow their specification. Their named headings are the headings; their items are the items. Apply content scoping judgment only to material they have NOT explicitly structured.
 

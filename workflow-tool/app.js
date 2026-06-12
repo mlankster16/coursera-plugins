@@ -107,10 +107,22 @@ function detectAccentColor(themeText) {
 // Serve a mock response matching the two-phase API shapes
 async function mockApi({ mode, type, userInput }) {
   await new Promise(r => setTimeout(r, mode === 'generate' ? 1200 : 500));
-  if (mode === 'recommend') return JSON.parse(JSON.stringify(MOCK_RECOMMEND));
+  if (mode === 'recommend') {
+    // Inputs under 80 chars simulate the vague-challenge clarification path
+    if ((userInput || '').length < 80) {
+      return { clarification: 'What content does the reading cover, and what do learners currently struggle with or get wrong? Knowing what learners should be able to do afterward would also help pick the right interaction.' };
+    }
+    return JSON.parse(JSON.stringify(MOCK_RECOMMEND));
+  }
   if (mode === 'generate' && /\b12\b|\btwelve\b/i.test(userInput || '')) {
     // Simulates the too-large advisory path (e.g. "all 12 zodiac houses")
     return { type, advice: 'Twelve items is more than a ' + type + ' can carry without overwhelming learners — the format works best with six or fewer. Consider focusing on the houses learners most often confuse, or splitting the set into two interactions on separate pages.' };
+  }
+  if (mode === 'generate' && /timeline|sequence-mismatch/i.test(userInput || '')) {
+    // Simulates a fit_note: requested type generated, with an honest caveat
+    const m2 = MOCK_RESPONSES['Click-to-Reveal'];
+    return { type, rationale: m2.recommendation.rationale, visual_theme: m2.visual_theme, content: m2.content, json: m2.json,
+      fit_note: 'Heads up: this content has no inherent order, so ' + type + ' is working against its structure here — a Tabbed explorer or Click-to-reveal would serve these parallel concepts better.' };
   }
   const key = Object.keys(MOCK_RESPONSES).find(k => k.toLowerCase() === String(type).toLowerCase());
   if (mode === 'static') {
@@ -371,6 +383,9 @@ const s2OutOfScope      = document.getElementById('s2-out-of-scope');
 const s2OutOfScopeDetail = document.getElementById('s2-out-of-scope-detail');
 const s2TooLarge        = document.getElementById('s2-too-large');
 const s2TooLargeDetail  = document.getElementById('s2-too-large-detail');
+const s2Clarify         = document.getElementById('s2-clarify');
+const s2ClarifyDetail   = document.getElementById('s2-clarify-detail');
+const s2FitNote         = document.getElementById('s2-fit-note');
 const previewIframe = document.getElementById('preview-iframe');
 const previewShimmer = document.getElementById('preview-shimmer');
 let s2TypeButtons = []; // populated dynamically when API response arrives
@@ -565,6 +580,7 @@ function showType(type) {
     s2TooLargeDetail.textContent = ' ' + gen.advice;
     s2RecommendBadge.textContent = 'Needs streamlining: ' + type;
     s2RationaleText.style.display = 'none';
+    s2FitNote.style.display = 'none';
     s2Regenerating.classList.remove('visible');
     s2ConfirmBtn.disabled = true;
     return;
@@ -588,6 +604,15 @@ function showType(type) {
     s2RecommendBadge.textContent = 'Viewing: ' + type;
     s2RationaleText.textContent = gen.rationale || '';
     s2RationaleText.style.display = gen.rationale ? '' : 'none';
+  }
+
+  // Honest fit note: the type was generated as requested, but Claude flagged
+  // a tension between its learning function and this content
+  if (gen.fit_note) {
+    s2FitNote.textContent = gen.fit_note;
+    s2FitNote.style.display = 'flex';
+  } else {
+    s2FitNote.style.display = 'none';
   }
 
   s2Regenerating.classList.remove('visible');
@@ -689,6 +714,8 @@ function resetAnalysisState() {
   s2PedagogyPanel.classList.remove('visible');
   s2OutOfScope.style.display = 'none';
   s2TooLarge.style.display = 'none';
+  s2Clarify.style.display = 'none';
+  s2FitNote.style.display = 'none';
   document.getElementById('preview-wrapper').style.display = '';
   document.getElementById('s2-preview-label').style.display = '';
   s2Regenerating.classList.remove('visible');
@@ -698,6 +725,20 @@ function resetAnalysisState() {
 async function runRecommended(input) {
   // Phase 1 — fast recommendation call: Step 2 paints in seconds
   const rec = await callApi({ mode: 'recommend', userInput: input });
+
+  // Vague challenge: show the clarifying questions instead of guessing
+  if (rec.clarification) {
+    setStep2Substate('preview');
+    s2Clarify.style.display = 'flex';
+    s2ClarifyDetail.textContent = ' ' + rec.clarification;
+    s2RecommendBadge.textContent = 'More detail needed';
+    s2RationaleText.style.display = 'none';
+    document.getElementById('preview-wrapper').style.display = 'none';
+    document.getElementById('s2-preview-label').style.display = 'none';
+    s2ConfirmBtn.disabled = true;
+    return;
+  }
+
   const recType = applyRecommendation(rec);
   setStep2Substate('preview');
 
@@ -728,10 +769,13 @@ async function runDirected(input) {
   s2RationaleText.style.display = 'none';
   showPreviewLoading(chosen);
 
-  // Background: fetch pedagogy notes for the pill row (nice-to-have)
+  // Background: fetch pedagogy notes for the pill row (nice-to-have).
+  // A clarification response is ignored here — the designer already knows
+  // what they want, so generation proceeds regardless.
   callApi({ mode: 'recommend', userInput: input })
     .then(rec => {
       if (analysis !== analysisToken || s2TypeButtons.length > 0) return;
+      if (!rec.available_types || !rec.available_types.length) return;
       recommendationData = rec;
       renderTypeButtons(rec.available_types, chosen);
     })

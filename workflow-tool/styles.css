@@ -304,6 +304,8 @@ main {
 .s2-out-of-scope { display: flex; gap: 10px; align-items: flex-start; background: #FDF0EA; border: 1.5px solid #C84E00; border-radius: 8px; padding: 14px 16px; margin-bottom: 16px; font-size: 0.88rem; color: var(--cast-iron); line-height: 1.55; }
 .s2-out-of-scope strong { color: #C84E00; display: block; margin-bottom: 4px; font-family: 'Montserrat', Arial, sans-serif; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; }
 .s2-out-of-scope-sub { display: block; margin-top: 6px; color: var(--graphite); font-style: italic; }
+.s2-fit-note { display: flex; gap: 8px; align-items: flex-start; font-size: 0.85rem; color: #7a3300; background: #FDF6F0; border: 0.5px solid #E89923; border-radius: 8px; padding: 10px 14px; margin: -8px 0 20px; line-height: 1.55; }
+.s2-fit-note::before { content: '\26A0'; flex-shrink: 0; color: #C84E00; }
 
 .s2-preview-label {
   font-family: 'Montserrat', Arial, sans-serif;
