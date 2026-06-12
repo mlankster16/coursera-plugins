@@ -197,11 +197,18 @@ async function callApi(payload, onProgress) {
     throw new Error('The response was cut off before it finished (hit the length limit). Please try again.');
   }
 
-  const cleaned = raw
+  // Isolate the JSON object: strip code fences, then slice from the first
+  // '{' to the last '}' so any prose before or after the object is dropped.
+  let cleaned = raw
     .replace(/^```json\n?/, '')
     .replace(/^```\n?/, '')
     .replace(/\n?```$/, '')
     .trim();
+  const firstBrace = cleaned.indexOf('{');
+  const lastBrace  = cleaned.lastIndexOf('}');
+  if (firstBrace > -1 && lastBrace > firstBrace) {
+    cleaned = cleaned.slice(firstBrace, lastBrace + 1);
+  }
 
   // First attempt — direct parse
   try {
@@ -230,7 +237,14 @@ function repairJson(src) {
   for (let i = 0; i < src.length; i++) {
     const c = src[i];
     if (!inStr) {
-      if (c === '"') inStr = true;
+      if (c === '"') { inStr = true; out += c; continue; }
+      if (c === ',') {
+        // Drop trailing commas: a comma whose next meaningful char closes
+        // the object/array is invalid JSON
+        let j = i + 1;
+        while (j < src.length && ' \t\n\r'.includes(src[j])) j++;
+        if (src[j] === '}' || src[j] === ']') continue;
+      }
       out += c;
       continue;
     }
