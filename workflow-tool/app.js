@@ -1,3 +1,7 @@
+// Raw text of the last response that failed to parse or arrived incomplete.
+// Offered to the user as a downloadable diagnostic in the error box.
+let lastUnparsedResponse = null;
+
 // ── API CONFIG ───────────────────────────────────────────────────────────
 // Set USE_MOCK_API = true to use built-in sample data (no key needed).
 // Set USE_MOCK_API = false to call Claude via the Netlify serverless
@@ -196,6 +200,13 @@ async function callApi(payload, onProgress) {
   if (stopReason === 'max_tokens') {
     throw new Error('The response was cut off before it finished (hit the length limit). Please try again.');
   }
+  if (!stopReason) {
+    // The stream ended without Anthropic's completion signal — the connection
+    // was dropped mid-response (e.g. the serverless function hit its time
+    // limit). The data is genuinely incomplete; parsing it would fail.
+    lastUnparsedResponse = raw;
+    throw new Error('The connection dropped before the response finished generating. Please try again — large interactions occasionally take longer than the server allows.');
+  }
 
   // Isolate the JSON object: strip code fences, then slice from the first
   // '{' to the last '}' so any prose before or after the object is dropped.
@@ -221,6 +232,7 @@ async function callApi(payload, onProgress) {
       return JSON.parse(repairJson(cleaned));
     } catch {
       console.error('Unparseable AI response:', raw);
+      lastUnparsedResponse = raw;
       throw new Error(`The AI returned a response that could not be parsed. Please try again. (Detail: ${parseErr.message})`);
     }
   }
@@ -715,7 +727,16 @@ analyzeBtn.addEventListener('click', async () => {
     else await runRecommended(input);
   } catch (err) {
     showStep(1);
-    errorBox.textContent = `Something went wrong: ${err.message}. Please try again.`;
+    errorBox.textContent = `Something went wrong: ${err.message}`;
+    if (lastUnparsedResponse) {
+      const link = document.createElement('a');
+      link.textContent = 'Download the raw AI response (for debugging — share this file when reporting the problem)';
+      link.href = URL.createObjectURL(new Blob([lastUnparsedResponse], { type: 'text/plain' }));
+      link.download = 'ai-response-debug.txt';
+      link.style.cssText = 'display:block;margin-top:8px;color:#7a3300;font-weight:600;text-decoration:underline;';
+      errorBox.appendChild(link);
+      lastUnparsedResponse = null;
+    }
     errorBox.style.display = 'block';
   }
 });
