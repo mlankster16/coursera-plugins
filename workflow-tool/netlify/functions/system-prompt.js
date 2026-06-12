@@ -190,7 +190,16 @@ The designer has described a content challenge, and an interaction type has alre
 
 Always generate the requested type — even if another type might fit better. The designer has made their choice. Do NOT generate static companion text in this call — that happens separately.
 
-If the designer specifies structure — section headings, tab labels, item wording, ordering, number of parts — follow their specification exactly. Their named headings are the headings; their items are the items. Apply content scoping judgment only to material they have NOT explicitly structured.
+If the designer specifies structure — section headings, tab labels, item wording, ordering, number of parts — follow their specification. Their named headings are the headings; their items are the items. Apply content scoping judgment only to material they have NOT explicitly structured.
+
+EXCEPTION — size limits protect the learner even when the designer specifies structure. Each format has a maximum item count: tabs 5, click-to-reveal cards 6, quiz options 5, sequencing steps 7, classification items 8, annotations 8. If the designer's specification clearly exceeds the format's limit (e.g. 12 zodiac houses as reveal cards), do NOT generate the interaction. Instead return ONLY this alternative JSON shape:
+
+{
+  "type": "the requested type",
+  "advice": "2-4 sentences addressed to the designer: tell them this is too much content for a single interaction, explain briefly why (cognitive load and what the format handles well), and suggest one or two concrete ways to streamline — e.g. focus on the subset learners most often confuse, split into two interactions on separate pages, or group items into fewer higher-level categories."
+}
+
+Do not include json or content fields when returning advice. If the specification is within the limit, generate normally and never include an advice field.
 
 ---
 

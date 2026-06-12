@@ -102,9 +102,18 @@
           </div>
         </div>
 
+        <div class="s2-out-of-scope" id="s2-too-large" style="display:none;" role="alert">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style="flex-shrink:0;margin-top:1px;"><circle cx="8" cy="8" r="7" stroke="#C84E00" stroke-width="1.5"/><path d="M8 4.5v4" stroke="#C84E00" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="11" r="0.75" fill="#C84E00"/></svg>
+          <div>
+            <strong>This is too much content for one interaction.</strong>
+            <span id="s2-too-large-detail"></span>
+            <span class="s2-out-of-scope-sub">Streamline your description on Step 1 and try again.</span>
+          </div>
+        </div>
+
         <p class="s2-rationale" id="s2-rationale-text"></p>
 
-        <p class="s2-preview-label">Live Preview</p>
+        <p class="s2-preview-label" id="s2-preview-label">Live Preview</p>
         <div id="preview-wrapper">
           <div class="preview-shimmer" id="preview-shimmer"></div>
           <div class="preview-loading" id="preview-loading" role="status">

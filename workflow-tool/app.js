@@ -105,9 +105,13 @@ function detectAccentColor(themeText) {
 }
 
 // Serve a mock response matching the two-phase API shapes
-async function mockApi({ mode, type }) {
+async function mockApi({ mode, type, userInput }) {
   await new Promise(r => setTimeout(r, mode === 'generate' ? 1200 : 500));
   if (mode === 'recommend') return JSON.parse(JSON.stringify(MOCK_RECOMMEND));
+  if (mode === 'generate' && /\b12\b|\btwelve\b/i.test(userInput || '')) {
+    // Simulates the too-large advisory path (e.g. "all 12 zodiac houses")
+    return { type, advice: 'Twelve items is more than a ' + type + ' can carry without overwhelming learners — the format works best with six or fewer. Consider focusing on the houses learners most often confuse, or splitting the set into two interactions on separate pages.' };
+  }
   const key = Object.keys(MOCK_RESPONSES).find(k => k.toLowerCase() === String(type).toLowerCase());
   if (mode === 'static') {
     return { static: key ? MOCK_RESPONSES[key].static : 'Mock static companion text for ' + type + '.' };
@@ -365,6 +369,8 @@ const s2RecommendBadge  = document.getElementById('s2-recommendation-badge');
 const s2RationaleText   = document.getElementById('s2-rationale-text');
 const s2OutOfScope      = document.getElementById('s2-out-of-scope');
 const s2OutOfScopeDetail = document.getElementById('s2-out-of-scope-detail');
+const s2TooLarge        = document.getElementById('s2-too-large');
+const s2TooLargeDetail  = document.getElementById('s2-too-large-detail');
 const previewIframe = document.getElementById('preview-iframe');
 const previewShimmer = document.getElementById('preview-shimmer');
 let s2TypeButtons = []; // populated dynamically when API response arrives
@@ -546,6 +552,27 @@ function showType(type) {
     btn.classList.toggle('cached', !!typeCache[keyOf(btn.dataset.type)] && !isCurrent);
   });
 
+  // Advice response: the spec was too large for this format. Show the
+  // advisory instead of a preview and keep Confirm disabled — the designer
+  // should streamline and re-run rather than accept a silently trimmed cut.
+  if (gen.advice) {
+    hidePreviewLoading();
+    previewShimmer.classList.remove('visible');
+    previewIframe.srcdoc = '';
+    document.getElementById('preview-wrapper').style.display = 'none';
+    document.getElementById('s2-preview-label').style.display = 'none';
+    s2TooLarge.style.display = 'flex';
+    s2TooLargeDetail.textContent = ' ' + gen.advice;
+    s2RecommendBadge.textContent = 'Needs streamlining: ' + type;
+    s2RationaleText.style.display = 'none';
+    s2Regenerating.classList.remove('visible');
+    s2ConfirmBtn.disabled = true;
+    return;
+  }
+  s2TooLarge.style.display = 'none';
+  document.getElementById('preview-wrapper').style.display = '';
+  document.getElementById('s2-preview-label').style.display = '';
+
   const baseType = directedType || recommendedType();
   const isBase = keyOf(type) === keyOf(baseType);
   const outOfScope = !directedType && isOutOfScopeRec();
@@ -661,6 +688,9 @@ function resetAnalysisState() {
   s2ConfirmBtn.disabled = true;
   s2PedagogyPanel.classList.remove('visible');
   s2OutOfScope.style.display = 'none';
+  s2TooLarge.style.display = 'none';
+  document.getElementById('preview-wrapper').style.display = '';
+  document.getElementById('s2-preview-label').style.display = '';
   s2Regenerating.classList.remove('visible');
 }
 
@@ -805,7 +835,7 @@ let confirmToken = 0; // guards the async static fill if the user re-confirms
 
 s2ConfirmBtn.addEventListener('click', async () => {
   const gen = currentType ? typeCache[keyOf(currentType)] : null;
-  if (!gen) return; // nothing generated yet
+  if (!gen || !gen.json) return; // nothing generated yet, or an advice-only response
   confirmedResult = {
     recommendation: {
       type: currentType,
